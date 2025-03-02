@@ -18,6 +18,7 @@ from .models import Note
 
 
 # Create your views here.
+
 def note_view(request, url_id):
     note, created = Note.objects.get_or_create(url_id = url_id)
     return render(request, 'note.html', {'note':note})

@@ -83,7 +83,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASES = {
-     "default": dj_database_url.config(default=os.getenv("DATABASE_URL"), conn_max_age=600),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.rpwmcpmrzfveosdcvwjz',
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': 'aws-0-ap-south-1.pooler.supabase.com',
+        'PORT': '5432',  # Use port 6543 for transaction pooler
+    }
 }
 
 
