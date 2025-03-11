@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CloudPad - Share Text & Files Anonymously</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <style>
+      :where([class^="ri-"])::before {
+        content: "\f3c2";
+      }
+      .editor-font {
+        font-family: "JetBrains Mono", monospace;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563eb",
+              secondary: "#3b82f6",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-blue-50/30 min-h-screen flex flex-col">
+    <header class="bg-white shadow-sm">
+      <nav
+        class="container mx-auto px-4 h-16 flex items-center justify-between"
+      >
+        <a href="/" class="text-2xl font-['Pacifico'] text-primary">CloudPad</a>
+        <div class="flex items-center space-x-6">
+          <a href="#about" class="text-sm text-gray-600 hover:text-primary"
+            >About</a
+          >
+          <a
+            href="#how-it-works"
+            class="text-sm text-gray-600 hover:text-primary"
+            >How it works</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    {% block content %}
+    <!-- This will be overridden in child templates -->
+    {% endblock %}
+
+    <footer class="mt-auto bg-white border-t">
+      <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="text-sm text-gray-600">
+            © 2025 CloudPad. All rights reserved.
+          </div>
+          <div class="flex items-center space-x-6 mt-4 md:mt-0">
+            <a href="/privacy" class="text-sm text-gray-600 hover:text-primary"
+              >Privacy Policy</a
+            >
+            <a href="/terms" class="text-sm text-gray-600 hover:text-primary"
+              >Terms of Service</a
+            >
+            <div class="flex items-center space-x-4">
+              <a href="#" class="text-gray-600 hover:text-primary">
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="ri-github-line"></i>
+                </div>
+              </a>
+              <a href="#" class="text-gray-600 hover:text-primary">
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="ri-twitter-x-line"></i>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      $(document).ready(function () {
+        let timeout = null;
+        let lastFetchedContent = $("#note-content").val();
+        let isTyping = false;
+
+        // Auto-save on input (debounced)
+        $("#note-content").on("input", function () {
+          isTyping = true;
+          clearTimeout(timeout);
+          $("#status").text("Saving...");
+
+          timeout = setTimeout(function () {
+            $.post("{% url 'save_note' note.url_id %}", {
+              content: $("#note-content").val(),
+              csrfmiddlewaretoken: "{{ csrf_token }}",
+            }).done(function () {
+              $("#status").text("Saved");
+              isTyping = false;
+            });
+          }, 800);
+        });
+
+        // Auto-fetch updated content every 3 seconds
+        setInterval(function () {
+          if (!isTyping) {
+            $.get("{% url 'load_note' note.url_id %}", function (response) {
+              let newContent = response.content.trim();
+              if (lastFetchedContent !== newContent) {
+                $("#note-content").val(newContent);
+                lastFetchedContent = newContent;
+              }
+            });
+          }
+        }, 3000);
+      });
+
+      const homePage = document.getElementById("home-page");
+      const editorPage = document.getElementById("editor-page");
+      const createNewBtn = document.getElementById("create-new");
+      const path = window.location.pathname.substring(1);
+
+      createNewBtn.addEventListener("click", () => {
+        homePage.classList.add("hidden");
+        editorPage.classList.remove("hidden");
+        const randomId = Math.random().toString(36).substring(2, 15);
+        document.getElementById("dynamic-path").textContent = randomId;
+      });
+
+      if (path) {
+        homePage.classList.add("hidden");
+        editorPage.classList.remove("hidden");
+      } else {
+        homePage.classList.remove("hidden");
+        editorPage.classList.add("hidden");
+      }
+
+      // File Upload Handling
+      const uploadButton = document.getElementById("upload-button");
+      const fileInput = document.getElementById("file-input");
+      const uploadDialog = document.getElementById("upload-dialog");
+      const closeDialog = document.getElementById("close-dialog");
+      const dropZone = document.getElementById("drop-zone");
+      const browseFiles = document.getElementById("browse-files");
+      const cancelUpload = document.getElementById("cancel-upload");
+      const confirmUpload = document.getElementById("confirm-upload");
+      const uploadPreview = document.getElementById("upload-preview");
+      const fileList = document.getElementById("file-list");
+
+      uploadButton.addEventListener("click", () => {
+        uploadDialog.classList.remove("hidden");
+        uploadPreview.innerHTML = "";
+      });
+
+      closeDialog.addEventListener("click", () =>
+        uploadDialog.classList.add("hidden")
+      );
+      cancelUpload.addEventListener("click", () =>
+        uploadDialog.classList.add("hidden")
+      );
+      browseFiles.addEventListener("click", () => fileInput.click());
+
+      fileInput.addEventListener("change", (e) => {
+        Array.from(e.target.files).forEach((file) => {
+          if (validateFile(file)) {
+            addFileToPreview(file);
+          }
+        });
+      });
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("border-primary");
+      });
+
+      dropZone.addEventListener("dragleave", () =>
+        dropZone.classList.remove("border-primary")
+      );
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("border-primary");
+        Array.from(e.dataTransfer.files).forEach((file) => {
+          if (validateFile(file)) {
+            addFileToPreview(file);
+          }
+        });
+      });
+
+      confirmUpload.addEventListener("click", () => {
+        const files = fileInput.files;
+        if (files.length === 0) {
+          showToast("No file selected!");
+          return; 
+        }
+
+        const formData = new FormData();
+        formData.append("file", files[0]); // Assuming one file per upload
+        formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+        fetch("{% url 'upload_file' note.url_id %}", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              showToast("File uploaded successfully!");
+              fetchUploadedFiles(); // Refresh file list
+            } else {
+              showToast("Upload failed!");
+            }
+          })
+          .catch(() => showToast("Error uploading file!"));
+      });
+
+      function fetchUploadedFiles() {
+        fetch("{% url 'get_uploaded_files' note.url_id %}")
+          .then((response) => response.json())
+          .then((data) => {
+            fileList.innerHTML = "";
+            if (data.file_url) {
+              const fileElement = document.createElement("div");
+              fileElement.innerHTML = `<a href="${data.file_url}" target="_blank">Download File</a>`;
+              fileList.appendChild(fileElement);
+            } else {
+              fileList.innerHTML = "<p>No files uploaded yet.</p>";
+            }
+          });
+      }
+
+      fetchUploadedFiles();
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.querySelector("span").textContent = message;
+        toast.classList.remove("hidden");
+        setTimeout(() => toast.classList.add("hidden"), 3000);
+      }
+
+      function validateFile(file) {
+        const maxSize = 10 * 1024 * 1024;
+        const allowedTypes = [
+          "application/pdf",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "text/plain",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ];
+        if (file.size > maxSize) {
+          showToast("File size exceeds 10MB limit", "error");
+          return false;
+        }
+        if (!allowedTypes.includes(file.type)) {
+          showToast("File type not supported", "error");
+          return false;
+        }
+        return true;
+      }
+
+      function addFileToPreview(file) {
+        const fileElement = document.createElement("div");
+        fileElement.innerHTML = `<div class='file-item'>${
+          file.name
+        } (${formatFileSize(file.size)})</div>`;
+        uploadPreview.appendChild(fileElement);
+      }
+
+      function formatFileSize(bytes) {
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
+      }
+
+      function addFileToList(file) {
+        const fileElement = document.createElement("div");
+        fileElement.innerHTML = `<div class='file-item'>
+            <a href="${file.url}" target="_blank">${file.name}</a> (${file.size})
+          </div>`;
+        fileList.appendChild(fileElement);
+      }
+
+      // Load files on page load
+      document.addEventListener("DOMContentLoaded", fetchFiles);
+    </script>
+  </body>
+</html>

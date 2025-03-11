@@ -1,56 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CloudPad - {{ note.url_id }}</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  </head>
-  <body>
-    <h1>Editing: {{ note.url_id }}</h1>
-
-    <!-- Text Editor -->
-    <textarea id="note-content" rows="10" cols="50">
-{{ note.content }}</textarea
-    >
-    <p id="status">Saved</p>
-
-    <script>
-      $(document).ready(function () {
-        let timeout = null;
-        let lastFetchedContent = $("#note-content").val(); // Store last fetched content
-        let isTyping = false; // Track if user is typing
-
-        // Auto-save on input (debounced)
-        $("#note-content").on("input", function () {
-          isTyping = true;
-          clearTimeout(timeout);
-          $("#status").text("Saving...");
-
-          timeout = setTimeout(function () {
-            $.post("{% url 'save_note' note.url_id %}", {
-              content: $("#note-content").val(),
-              csrfmiddlewaretoken: "{{ csrf_token }}",
-            }).done(function (response) {
-              $("#status").text("Saved");
-              isTyping = false; // User has stopped typing
-            });
-          }, 800); // 800ms delay before saving
-        });
-
-        // Auto-fetch updated content every 3 seconds
-        setInterval(function () {
-          if (!isTyping) {
-            // Only fetch if the user is NOT typing
-            $.get("{% url 'load_note' note.url_id %}", function (response) {
-              if (lastFetchedContent !== response.content) {
-                $("#note-content").val(response.content);
-                lastFetchedContent = response.content; // Update stored content
-              }
-            });
-          }
-        }, 3000); // Fetch every 3 seconds
-      });
-    </script>
-  </body>
-</html>
+{% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %} 
+{% block content %}
+<main class="flex-1 container mx-auto px-4 py-8">
+  <div id="home-page" class="max-w-4xl mx-auto space-y-6">
+  <div class="text-center space-y-4 mb-8">
+  <h1 class="text-4xl font-bold text-gray-900">Share Text & Files Anonymously</h1>
+  <p class="text-xl text-gray-600">No registration required. Just start typing and share instantly.</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+  <div class="bg-white rounded-lg shadow p-6 text-center">
+  <div class="w-12 h-12 mx-auto mb-4 text-primary">
+  <i class="ri-lock-line ri-2x"></i>
+  </div>
+  <h3 class="text-lg font-medium text-gray-900 mb-2">Private & Secure</h3>
+  <p class="text-gray-600">Your data is encrypted and automatically deleted after 7 days</p>
+  </div>
+  <div class="bg-white rounded-lg shadow p-6 text-center">
+  <div class="w-12 h-12 mx-auto mb-4 text-primary">
+  <i class="ri-file-text-line ri-2x"></i>
+  </div>
+  <h3 class="text-lg font-medium text-gray-900 mb-2">File Support</h3>
+  <p class="text-gray-600">Upload and share multiple file types up to 10MB each</p>
+  </div>
+  <div class="bg-white rounded-lg shadow p-6 text-center">
+  <div class="w-12 h-12 mx-auto mb-4 text-primary">
+  <i class="ri-share-line ri-2x"></i>
+  </div>
+  <h3 class="text-lg font-medium text-gray-900 mb-2">Instant Sharing</h3>
+  <p class="text-gray-600">Get a unique URL to share your content immediately</p>
+  </div>
+  </div>
+  <button id="create-new" class="w-full bg-primary text-white py-4 rounded-button hover:bg-opacity-90 text-lg font-medium">Create New Pad</button>
+  </div>
+  <div id="editor-page" class="max-w-4xl mx-auto space-y-6 hidden">
+  <div class="bg-white rounded shadow p-4 flex items-center">
+  <div class="flex-1 bg-blue-50 rounded px-3 py-2 editor-font text-sm">
+  <span class="text-gray-600">cloudpad.io/</span>
+  <span id="dynamic-path" class="text-primary">{{ note.url_id }}</span>
+  </div>
+  <button id="copy-url" class="ml-3 p-2 text-gray-600 hover:text-primary rounded-button cursor-pointer">
+  <div class="w-5 h-5 flex items-center justify-center">
+  <i class="ri-file-copy-line"></i>
+  </div>
+  </button>
+  </div>
+  <div class="bg-white rounded shadow">
+  <div class="border-b px-4 py-3 flex items-center justify-between">
+  <div class="flex items-center space-x-4">
+  <div class="relative flex justify-center items-center gap-1.5">
+  <input type="file" id="file-input" class="hidden" multiple accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" />
+  <button id="upload-button" class="text-lg text-gray-600 hover:text-primary cursor-pointer">
+  <div class="w-5 h-5 flex items-center justify-center">
+  <i class="ri-attachment-line"></i>
+  </div>
+  </button>
+  <span class="text-sm text-gray-500">Max file size: 10MB</span>
+  </div>
+  <div id="upload-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+  <div class="flex justify-between items-center mb-4">
+  <h3 class="text-lg font-medium text-gray-900">Upload Files</h3>
+  <button id="close-dialog" class="text-gray-500 hover:text-gray-700">
+  <div class="w-5 h-5 flex items-center justify-center">
+  <i class="ri-close-line"></i>
+  </div>
+  </button>
+  </div>
+  <div id="drop-zone" class="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center mb-4">
+  <div class="w-12 h-12 mx-auto mb-4 text-gray-400">
+  <i class="ri-upload-cloud-line ri-3x"></i>
+  </div>
+  <p class="text-gray-600 mb-2">Drag and drop files here or</p>
+  <button id="browse-files" class="text-primary hover:text-primary-dark font-medium">Browse files</button>
+  <p class="text-sm text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, GIF</p>
+  <p class="text-sm text-gray-500">Maximum file size: 10MB</p>
+  </div>
+  <div id="upload-preview" class="space-y-2 max-h-48 overflow-y-auto"></div>
+  <div class="flex justify-end mt-4 space-x-3">
+  <button id="cancel-upload" class="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-button whitespace-nowrap">Cancel</button>
+  <button id="confirm-upload" class="px-4 py-2 bg-primary text-white rounded-button hover:bg-opacity-90 whitespace-nowrap">Upload Files</button>
+  </div>
+  </div>
+  </div>
+  </div>
+  <div id="status" class="text-primary text-sm px-3 py-1">
+  Saved!
+  </div>
+  </div>
+  <textarea id="note-content" class="w-full p-4 editor-font text-gray-800 text-sm focus:outline-none" rows="16" placeholder="Start typing here...">
+    {{ note.content }}
+  </textarea>
+  </div>
+  <div id="file-list" class="space-y-2">
+  </div>
+  </div>
+  </div>
+  </main>
+  <div id="toast" class="fixed top-4 right-4 bg-white shadow-lg rounded px-4 py-3 hidden">
+  <div class="flex items-center">
+  <div class="w-5 h-5 flex items-center justify-center text-green-500">
+  <i class="ri-checkbox-circle-line"></i>
+  </div>
+  <span class="ml-2 text-sm text-gray-700">URL copied to clipboard!</span>
+  </div>
+  </div>
+{% endblock %}

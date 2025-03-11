@@ -57,7 +57,7 @@ ROOT_URLCONF = 'CloudPad.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "CloudPad" / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,7 +89,7 @@ DATABASES = {
         'USER': 'postgres.rpwmcpmrzfveosdcvwjz',
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': 'aws-0-ap-south-1.pooler.supabase.com',
-        'PORT': '5432',  # Use port 6543 for transaction pooler
+        'PORT': '5432',
     }
 }
 
@@ -136,3 +136,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = ["*"]
+
+
+import os
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
