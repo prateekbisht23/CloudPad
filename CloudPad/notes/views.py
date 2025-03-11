@@ -1,23 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import Note
-# import os, supabase
-# from dotenv import load_dotenv
-# from django.views.decorators.csrf import csrf_exempt
-# from supabase import create_client, Client
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
-
-# Load environment variables
-# load_dotenv()
-
-# # Initialize Supabase client
-# supabase_url = os.getenv("SUPABASE_URL")
-# supabase_key = os.getenv("SUPABASE_KEY")
-
-# supabase: Client = create_client(supabase_url, supabase_key)
-
-
-# Create your views here.
 
 def note_view(request, url_id):
     note, created = Note.objects.get_or_create(url_id = url_id)
