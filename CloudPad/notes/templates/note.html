@@ -1,106 +1,417 @@
 {% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %} 
+
 {% block content %}
 <main class="flex-1 container mx-auto px-4 py-8">
-  <div id="home-page" class="max-w-4xl mx-auto space-y-6">
-  <div class="text-center space-y-4 mb-8">
-  <h1 class="text-4xl font-bold text-gray-900">Share Text & Files Anonymously</h1>
-  <p class="text-xl text-gray-600">No registration required. Just start typing and share instantly.</p>
+  {% comment %} <div id="home-page" class="max-w-4xl mx-auto space-y-6">
+    <div class="text-center space-y-4 mb-8">
+      <h1 class="text-4xl font-bold text-gray-900">Share Text & Files Anonymously</h1>
+      <p class="text-xl text-gray-600">No registration required. Just start typing and share instantly.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-4 text-primary">
+          <i class="ri-lock-line ri-2x"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Private & Secure</h3>
+        <p class="text-gray-600">Your data is encrypted and automatically deleted after 7 days</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-4 text-primary">
+          <i class="ri-file-text-line ri-2x"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">File Support</h3>
+        <p class="text-gray-600">Upload and share multiple file types up to 10MB each</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-4 text-primary">
+          <i class="ri-share-line ri-2x"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Instant Sharing</h3>
+        <p class="text-gray-600">Get a unique URL to share your content immediately</p>
+      </div>
+    </div>
+    <button id="create-new" class="w-full bg-primary text-white py-4 rounded-button hover:bg-opacity-90 text-lg font-medium">Create New Pad</button>
+  </div> {% endcomment %}
+  <div id="editor-page" class="max-w-4xl mx-auto space-y-6">
+    <div class="bg-white rounded shadow p-4 flex items-center">
+      <div class="flex-1 bg-blue-50 rounded px-3 py-2 editor-font text-sm">
+        <span class="text-gray-600">cloudpad.io/</span>
+        <span id="dynamic-path" class="text-primary">{{ note.url_id }}</span>
+      </div>
+      <button id="copy-url" class="ml-3 p-2 text-gray-600 hover:text-primary rounded-button cursor-pointer">
+        <div class="w-5 h-5 flex items-center justify-center">
+          <i class="ri-file-copy-line"></i>
+        </div>
+      </button>
+    </div>
+    <div class="bg-white rounded shadow">
+      <div class="border-b px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="relative flex justify-center items-center gap-1.5">
+            <input type="file" id="file-input" class="hidden" multiple accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" />
+            <button id="upload-button" class="text-lg text-gray-600 hover:text-primary cursor-pointer">
+              <div class="w-5 h-5 flex items-center justify-center">
+                <i class="ri-attachment-line"></i>
+              </div>
+            </button>
+            <span class="text-sm text-gray-500">Max file size: 10MB</span>
+          </div>
+          <div id="upload-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Upload Files</h3>
+                <button id="close-dialog" class="text-gray-500 hover:text-gray-700">
+                  <div class="w-5 h-5 flex items-center justify-center">
+                    <i class="ri-close-line"></i>
+                  </div>
+                </button>
+              </div>
+              <div id="drop-zone" class="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center mb-4">
+                <div class="w-12 h-12 mx-auto mb-4 text-gray-400">
+                  <i class="ri-upload-cloud-line ri-3x"></i>
+                </div>
+                <p class="text-gray-600 mb-2">Drag and drop files here or</p>
+                <button id="browse-files" class="text-primary hover:text-primary-dark font-medium">Browse files</button>
+                <p class="text-sm text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, GIF</p>
+                <p class="text-sm text-gray-500">Maximum file size: 10MB</p>
+              </div>
+              <div id="upload-preview" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div>
+              <div class="flex justify-end mt-4 space-x-3">
+                <button id="cancel-upload" class="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-button whitespace-nowrap">Cancel</button>
+                <button id="confirm-upload" class="px-4 py-2 bg-primary text-white rounded-button hover:bg-opacity-90 whitespace-nowrap">Upload Files</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="status" class="text-primary text-sm px-3 py-1">
+          Saved!
+        </div>
+      </div>
+      <textarea id="note-content" class="w-full p-4 editor-font text-gray-800 text-sm focus:outline-none" rows="16" placeholder="Start typing here...">
+        {{ note.content }}
+      </textarea>
+    </div>
+    <div id="file-list" class="space-y-2">
+    </div>
   </div>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-  <div class="bg-white rounded-lg shadow p-6 text-center">
-  <div class="w-12 h-12 mx-auto mb-4 text-primary">
-  <i class="ri-lock-line ri-2x"></i>
   </div>
-  <h3 class="text-lg font-medium text-gray-900 mb-2">Private & Secure</h3>
-  <p class="text-gray-600">Your data is encrypted and automatically deleted after 7 days</p>
-  </div>
-  <div class="bg-white rounded-lg shadow p-6 text-center">
-  <div class="w-12 h-12 mx-auto mb-4 text-primary">
-  <i class="ri-file-text-line ri-2x"></i>
-  </div>
-  <h3 class="text-lg font-medium text-gray-900 mb-2">File Support</h3>
-  <p class="text-gray-600">Upload and share multiple file types up to 10MB each</p>
-  </div>
-  <div class="bg-white rounded-lg shadow p-6 text-center">
-  <div class="w-12 h-12 mx-auto mb-4 text-primary">
-  <i class="ri-share-line ri-2x"></i>
-  </div>
-  <h3 class="text-lg font-medium text-gray-900 mb-2">Instant Sharing</h3>
-  <p class="text-gray-600">Get a unique URL to share your content immediately</p>
-  </div>
-  </div>
-  <button id="create-new" class="w-full bg-primary text-white py-4 rounded-button hover:bg-opacity-90 text-lg font-medium">Create New Pad</button>
-  </div>
-  <div id="editor-page" class="max-w-4xl mx-auto space-y-6 hidden">
-  <div class="bg-white rounded shadow p-4 flex items-center">
-  <div class="flex-1 bg-blue-50 rounded px-3 py-2 editor-font text-sm">
-  <span class="text-gray-600">cloudpad.io/</span>
-  <span id="dynamic-path" class="text-primary">{{ note.url_id }}</span>
-  </div>
-  <button id="copy-url" class="ml-3 p-2 text-gray-600 hover:text-primary rounded-button cursor-pointer">
-  <div class="w-5 h-5 flex items-center justify-center">
-  <i class="ri-file-copy-line"></i>
-  </div>
-  </button>
-  </div>
-  <div class="bg-white rounded shadow">
-  <div class="border-b px-4 py-3 flex items-center justify-between">
-  <div class="flex items-center space-x-4">
-  <div class="relative flex justify-center items-center gap-1.5">
-  <input type="file" id="file-input" class="hidden" multiple accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" />
-  <button id="upload-button" class="text-lg text-gray-600 hover:text-primary cursor-pointer">
-  <div class="w-5 h-5 flex items-center justify-center">
-  <i class="ri-attachment-line"></i>
-  </div>
-  </button>
-  <span class="text-sm text-gray-500">Max file size: 10MB</span>
-  </div>
-  <div id="upload-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-  <div class="flex justify-between items-center mb-4">
-  <h3 class="text-lg font-medium text-gray-900">Upload Files</h3>
-  <button id="close-dialog" class="text-gray-500 hover:text-gray-700">
-  <div class="w-5 h-5 flex items-center justify-center">
-  <i class="ri-close-line"></i>
-  </div>
-  </button>
-  </div>
-  <div id="drop-zone" class="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center mb-4">
-  <div class="w-12 h-12 mx-auto mb-4 text-gray-400">
-  <i class="ri-upload-cloud-line ri-3x"></i>
-  </div>
-  <p class="text-gray-600 mb-2">Drag and drop files here or</p>
-  <button id="browse-files" class="text-primary hover:text-primary-dark font-medium">Browse files</button>
-  <p class="text-sm text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, GIF</p>
-  <p class="text-sm text-gray-500">Maximum file size: 10MB</p>
-  </div>
-  <div id="upload-preview" class="space-y-2 max-h-48 overflow-y-auto"></div>
-  <div class="flex justify-end mt-4 space-x-3">
-  <button id="cancel-upload" class="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-button whitespace-nowrap">Cancel</button>
-  <button id="confirm-upload" class="px-4 py-2 bg-primary text-white rounded-button hover:bg-opacity-90 whitespace-nowrap">Upload Files</button>
-  </div>
-  </div>
-  </div>
-  </div>
-  <div id="status" class="text-primary text-sm px-3 py-1">
-  Saved!
-  </div>
-  </div>
-  <textarea id="note-content" class="w-full p-4 editor-font text-gray-800 text-sm focus:outline-none" rows="16" placeholder="Start typing here...">
-    {{ note.content }}
-  </textarea>
-  </div>
-  <div id="file-list" class="space-y-2">
-  </div>
-  </div>
-  </div>
-  </main>
-  <div id="toast" class="fixed top-4 right-4 bg-white shadow-lg rounded px-4 py-3 hidden">
+</main>
+<div id="toast" class="fixed top-4 right-4 bg-white shadow-lg rounded px-4 py-3 hidden">
   <div class="flex items-center">
-  <div class="w-5 h-5 flex items-center justify-center text-green-500">
-  <i class="ri-checkbox-circle-line"></i>
+    <div class="w-5 h-5 flex items-center justify-center text-green-500">
+      <i class="ri-checkbox-circle-line"></i>
+    </div>
+    <span class="ml-2 text-sm text-gray-700">URL copied to clipboard!</span>
   </div>
-  <span class="ml-2 text-sm text-gray-700">URL copied to clipboard!</span>
-  </div>
-  </div>
+</div>
+
+<script>
+
+  const SUPABASE_URL = 'https://rpwmcpmrzfveosdcvwjz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwd21jcG1yemZ2ZW9zZGN2d2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODAxNTksImV4cCI6MjA1NTk1NjE1OX0.FDafYWgJbHN8AktZ202GJrBhDX_hM2NUqAyHLBAwtC8';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    let timeout = null;
+    let lastFetchedContent = document.getElementById('note-content').value;
+    let isTyping = false;
+  
+    // Function to save the note
+    const saveNote = () => {
+      const content = document.getElementById('note-content').value;
+      const csrfToken = "{{ csrf_token }}"; // Django CSRF token
+  
+      fetch("{% url 'save_note' note.url_id %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken=${csrfToken}`  
+      }).then(response => {
+        if (response.ok) {
+          document.getElementById('status').innerText = 'Saved';
+          isTyping = false;
+        }
+      }).catch(error => console.error('Failed to save note:', error));
+    };
+  
+    // Auto-save on input (debounced)
+    document.getElementById('note-content').addEventListener('input', () => {
+      isTyping = true;
+      clearTimeout(timeout);
+      document.getElementById('status').innerText = 'Saving...';
+  
+      timeout = setTimeout(saveNote, 800);
+    });
+  
+    // Function to fetch the latest note content
+    const fetchNote = () => {
+      if (!isTyping) {
+        fetch("{% url 'load_note' note.url_id %}")
+          .then(response => response.json())
+          .then(data => {
+            const newContent = data.content.trim();
+            if (lastFetchedContent !== newContent) {
+              document.getElementById('note-content').value = newContent;
+              lastFetchedContent = newContent;
+            }
+          })
+          .catch(error => console.error('Failed to fetch note:', error));
+      }
+    };
+    // Auto-fetch updated content every 3 seconds
+    setInterval(fetchNote, 3000);
+
+    fetchFilesFromBucket();
+
+  });
+
+  const copyURL = document.getElementById('copy-url');
+
+  const uploadButton = document.getElementById("upload-button");
+  const uploadDialog = document.getElementById("upload-dialog");
+  const closeDialog = document.getElementById("close-dialog");
+  const cancelUpload = document.getElementById("cancel-upload");
+  const browseFiles = document.getElementById("browse-files");
+  const fileInput = document.getElementById("file-input")
+  const dropZone = document.getElementById("drop-zone");
+  const uploadPreview = document.getElementById("upload-preview");
+
+  const confirmUpload = document.getElementById("confirm-upload");
+
+  copyURL.addEventListener('click', () => {
+    const baseURL = 'http://cloudpad-mya5.onrender.com/';
+    const dynamicPath = document.getElementById('dynamic-path').innerText;
+
+    const fullURL = `${baseURL}${dynamicPath}`;
+
+    navigator.clipboard.writeText(fullURL).then(() => {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2000);
+    }).catch(err => {
+      console.error('Failed to copy URL:', err);
+    });
+  });
+
+  uploadButton.addEventListener('click', () => {
+    uploadDialog.classList.remove("hidden");
+    uploadPreview.innerHTML = "";
+  });
+  
+  closeDialog.addEventListener('click', () => {
+    uploadDialog.classList.add("hidden");
+  });
+
+  cancelUpload.addEventListener('click', () => {
+    uploadDialog.classList.add("hidden");
+  });
+
+  browseFiles.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener("change", (e) => {
+    Array.from(e.target.files).forEach((file) => {
+      if (validateFile(file)) {
+        addFileToPreview(file);
+      }
+    });
+  });
+
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("border-primary");
+  });
+
+  dropZone.addEventListener("dragleave", () =>
+    dropZone.classList.remove("border-primary")
+  );
+
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("border-primary");
+    Array.from(e.dataTransfer.files).forEach((file) => {
+      if (validateFile(file)) {
+        addFileToPreview(file);
+      }
+    });
+  });
+
+  function validateFile(file) {
+    const maxSize = 10 * 1024 * 1024;
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (file.size > maxSize) {
+      showToast("File size exceeds 10MB limit", "error");
+      return false;
+    }
+    if (!allowedTypes.includes(file.type)) {
+      showToast("File type not supported", "error");
+      return false;
+    }
+    return true;
+  }
+
+  function addFileToPreview(file) {
+    const fileElement = document.createElement("div");
+    fileElement.innerHTML = `<div class='pl-4'>${
+      file.name
+    } (${formatFileSize(file.size)})</div>`;
+    uploadPreview.appendChild(fileElement);
+  }
+
+  function formatFileSize(bytes) {
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
+  }
+
+
+  confirmUpload.addEventListener('click', async () => {
+    const dynamicPath = document.getElementById('dynamic-path').innerText;
+    const files = fileInput.files;
+
+    if (!files.length) {
+      alert("Please select files to upload.");
+      return;
+    }
+
+    try {
+      // Try uploading directly
+      for (const file of files) {
+        await uploadFileToBucket(dynamicPath, file);
+      }
+    } catch (error) {
+      if (error.statusCode === '404') {
+        console.log("Sub-bucket doesn't exist — creating it...");
+        await createSubBucket(dynamicPath);
+        
+        // Retry uploading after creating the bucket
+        for (const file of files) {
+          await uploadFileToBucket(dynamicPath, file);
+        }
+      } else {
+        console.error("Error uploading files:", error.message);
+        alert(`Failed to upload files: ${error.message}`);
+        return;
+      }
+    }
+  
+    alert("Files uploaded successfully!");
+    uploadDialog.classList.add('hidden');
+    uploadPreview.innerHTML = ''; // Clear preview after upload
+  });
+
+  async function createSubBucket(dynamicPath) {
+    const { data, error } = await supabase
+      .storage
+      .from('cloudpad-files') // Parent bucket name
+      .upload(`${dynamicPath}/.placeholder`, new Blob([]), {
+        upsert: false // Don't overwrite if it already exists
+      });
+  
+    if (error && error.statusCode !== '409') {
+      throw new Error(`Failed to create sub-bucket: ${error.message}`);
+    }
+  }  
+
+  async function uploadFileToBucket(dynamicPath, file) {
+    const filePath = `${dynamicPath}/${file.name}`;
+  
+    const { data, error } = await supabase
+      .storage
+      .from('cloudpad-files') // Parent bucket name
+      .upload(filePath, file, {
+        upsert: true // Overwrites existing files
+      });
+  
+    if (error) {
+      throw new Error(`Failed to upload file: ${file.name} - ${error.message}`);
+    }
+  }
+
+  async function fetchFilesFromBucket() {
+    const dynamicPath = document.getElementById('dynamic-path').innerText;
+    const fileList = document.getElementById('file-list');
+  
+    // Clear existing files before fetching new ones
+    fileList.innerHTML = '';
+  
+    // 👇 Get list of files from the sub-bucket
+    const { data, error } = await supabase
+      .storage
+      .from('cloudpad-files')
+      .list(dynamicPath);
+  
+    if (error) {
+      console.error('Failed to load files:', error.message);
+      fileList.innerHTML = '<p class="text-gray-500">Failed to load files.</p>';
+      return;
+    }
+  
+    if (!data.length) {
+      fileList.innerHTML = '<p class="text-gray-500">No files uploaded yet.</p>';
+      return;
+    }
+  
+    // 🎯 Display the files in the UI
+    data.forEach((file) => {
+      const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/cloudpad-files/${dynamicPath}/${file.name}`;
+      
+      const fileElement = document.createElement('div');
+      fileElement.classList.add('flex', 'justify-between', 'items-center', 'py-2', 'border-b');
+  
+      fileElement.innerHTML = `
+        <a href="${fileUrl}" target="_blank" class="text-primary hover:underline truncate">
+          ${file.name}
+        </a>
+        <div class="flex items-center space-x-3">
+          <a href="${fileUrl}" target="_blank" download="${file.name}">
+            <i class="ri-download-line text-primary hover:text-blue-600 cursor-pointer"></i>
+          </a>
+          <i class="ri-close-line text-red-500 hover:text-red-700 cursor-pointer"
+            onclick="deleteFileFromBucket('${file.name}')">
+          </i>
+        </div>
+      `;
+  
+      fileList.appendChild(fileElement);
+    });
+  }
+  
+  async function deleteFileFromBucket(fileName) {
+    const dynamicPath = document.getElementById('dynamic-path').innerText;
+    const filePath = `${dynamicPath}/${fileName}`;
+
+    try {
+        const { error } = await supabase
+            .storage
+            .from('cloudpad-files')
+            .remove([filePath]);
+
+        if (error) {
+            throw new Error(`Failed to delete file: ${error.message}`);
+        }
+
+        alert(`"${fileName}" deleted successfully`, "success");
+
+        // Refresh the file list after deletion
+        fetchFilesFromBucket();
+    } catch (error) {
+        console.error("Error deleting file:", error.message);
+        showToast(`Failed to delete file: ${error.message}`, "error");
+    }
+  }
+
+
+</script>
+
 {% endblock %}

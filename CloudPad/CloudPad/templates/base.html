@@ -24,6 +24,8 @@
         font-family: "JetBrains Mono", monospace;
       }
     </style>
+    {% load static %}
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -103,41 +105,6 @@
     </footer>
 
     <script>
-      $(document).ready(function () {
-        let timeout = null;
-        let lastFetchedContent = $("#note-content").val();
-        let isTyping = false;
-
-        // Auto-save on input (debounced)
-        $("#note-content").on("input", function () {
-          isTyping = true;
-          clearTimeout(timeout);
-          $("#status").text("Saving...");
-
-          timeout = setTimeout(function () {
-            $.post("{% url 'save_note' note.url_id %}", {
-              content: $("#note-content").val(),
-              csrfmiddlewaretoken: "{{ csrf_token }}",
-            }).done(function () {
-              $("#status").text("Saved");
-              isTyping = false;
-            });
-          }, 800);
-        });
-
-        // Auto-fetch updated content every 3 seconds
-        setInterval(function () {
-          if (!isTyping) {
-            $.get("{% url 'load_note' note.url_id %}", function (response) {
-              let newContent = response.content.trim();
-              if (lastFetchedContent !== newContent) {
-                $("#note-content").val(newContent);
-                lastFetchedContent = newContent;
-              }
-            });
-          }
-        }, 3000);
-      });
 
       const homePage = document.getElementById("home-page");
       const editorPage = document.getElementById("editor-page");
@@ -211,11 +178,11 @@
         });
       });
 
-      confirmUpload.addEventListener("click", () => {
+      {% comment %} confirmUpload.addEventListener("click", () => {
         const files = fileInput.files;
         if (files.length === 0) {
           showToast("No file selected!");
-          return; 
+          return;
         }
 
         const formData = new FormData();
@@ -253,7 +220,7 @@
           });
       }
 
-      fetchUploadedFiles();
+      fetchUploadedFiles(); {% endcomment %}
 
       function showToast(message, type = "success") {
         const toast = document.getElementById("toast");
