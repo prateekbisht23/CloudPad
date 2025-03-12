@@ -1,0 +1,277 @@
+{% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %}
+{%block content %}
+
+<main class="flex-1 container mx-auto px-4 py-8">
+  <div id="home-page" class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-10 mb-16">
+      <div class="space-y-6">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+          Share Text & Files <span class="text-primary">Instantly</span> — No
+          Registration Required
+        </h1>
+        <p class="text-xl text-gray-600">
+          CloudPad is a lightweight, real-time text and file-sharing platform
+          designed for quick and secure sharing. Create a unique URL, start
+          typing or upload files, and share instantly — no accounts, no hassle.
+        </p>
+        <div class="bg-white shadow-lg rounded-lg p-6 space-y-4">
+          <div class="flex items-center">
+            <span class="text-gray-500 text-lg">cloudpad.io/</span>
+            <input
+              type="text"
+              id="custom-path"
+              class="flex-1 bg-transparent border-none text-primary text-lg focus:outline-none"
+              placeholder="your-secure-pad"
+            />
+            <button
+              id="go-to-pad"
+              class="ml-2 bg-primary text-white px-6 py-3 rounded-button hover:bg-opacity-90 text-lg"
+            >
+              Create Pad
+            </button>
+          </div>
+          <div class="text-center">
+            <button
+              id="generate-random"
+              class="text-primary hover:text-opacity-80"
+            >
+              or generate a random secure name
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <img
+          src="https://public.readdy.ai/ai/img_res/19aa870e3ae109821c05c1df520f110c.jpg"
+          alt="CloudPad Illustration"
+          class="w-full rounded-lg shadow-xl"
+        />
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div
+          class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+        >
+          <div class="w-6 h-6 flex items-center justify-center text-primary">
+            <i class="ri-team-line"></i>
+          </div>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          Real-Time Collaboration
+        </h3>
+        <p class="text-gray-600">
+          Instantly share notes and files with others through a unique,
+          easy-to-access URL.
+        </p>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div
+          class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+        >
+          <div class="w-6 h-6 flex items-center justify-center text-primary">
+            <i class="ri-shield-check-line"></i>
+          </div>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          Secure & Temporary
+        </h3>
+        <p class="text-gray-600">
+          Your content is stored securely and automatically deleted after 7 days
+          of inactivity, ensuring your privacy.
+        </p>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div
+          class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+        >
+          <div class="w-6 h-6 flex items-center justify-center text-primary">
+            <i class="ri-file-upload-line"></i>
+          </div>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          Effortless File Sharing
+        </h3>
+        <p class="text-gray-600">
+          Upload and share PDFs, images, text files, and more — all in one
+          place.
+        </p>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div
+          class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+        >
+          <div class="w-6 h-6 flex items-center justify-center text-primary">
+            <i class="ri-user-add-line"></i>
+          </div>
+        </div>
+        <div class="relative">
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+            No Sign-Up Required
+          </h3>
+          <p class="text-gray-600">
+            Get started immediately without creating an account.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      id="how-it-works"
+      class="bg-white rounded-lg shadow-lg p-8 mb-16 scroll-mt-20"
+    >
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">How CloudPad Works</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="space-y-8">
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-primary font-semibold text-lg">1</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-2 text-lg">
+                Create Your Secure Pad
+              </h3>
+              <p class="text-gray-600">
+                Choose a custom URL or generate a random secure link. Your pad
+                is instantly ready for use with no registration required.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-primary font-semibold text-lg">2</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-2 text-lg">
+                Add Content Seamlessly
+              </h3>
+              <p class="text-gray-600">
+                Start typing text or drag & drop files up to 10MB. Supports
+                markdown formatting, code snippets, and multiple file types.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-primary font-semibold text-lg">3</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-2 text-lg">
+                Real-Time Collaboration
+              </h3>
+              <p class="text-gray-600">
+                Share your pad's URL with anyone. All changes are synced
+                instantly, making collaboration effortless and efficient.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4">
+            <div
+              class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-primary font-semibold text-lg">4</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-2 text-lg">
+                Secure & Self-Destructing
+              </h3>
+              <p class="text-gray-600">
+                Your content is encrypted and automatically deleted after 7 days
+                of inactivity, ensuring your data remains private.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <img
+            src="https://public.readdy.ai/ai/img_res/da576bce5f1811562dea720aec951975.jpg"
+            alt="How CloudPad Works"
+            class="w-full rounded-xl shadow-2xl"
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-xl"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<div
+  id="toast"
+  class="fixed top-4 right-4 bg-white shadow-lg rounded px-4 py-3 hidden"
+>
+  <div class="flex items-center">
+    <div class="w-5 h-5 flex items-center justify-center text-green-500">
+      <i class="ri-error-warning-line text-lg text-red-500"></i>
+    </div>
+    <span class="ml-2 text-sm text-gray-700">toast!!</span>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const customPathInput = document.getElementById("custom-path");
+    const goToPadButton = document.getElementById("go-to-pad");
+    const generateRandomButton = document.getElementById("generate-random");
+
+    // Function to redirect to the pad based on custom or generated path
+    function goToPad(path) {
+      if (path.trim() !== "") {
+        window.location.href = `/${encodeURIComponent(path.trim())}/`;
+      } else {
+        showToast("Please enter a valid path!!");
+      }
+    }
+
+    // Handle custom path creation
+    goToPadButton.addEventListener("click", () => {
+      const customPath = customPathInput.value.trim();
+      if (customPath) {
+        goToPad(customPath);
+      } else {
+        showToast("Please enter a valid path!!");
+      }
+    });
+
+    // Function to generate a random secure URL
+    function generateRandomString(length) {
+      const characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += characters.charAt(
+          Math.floor(Math.random() * characters.length)
+        );
+      }
+      return result;
+    }
+
+    // Handle random secure link generation
+    generateRandomButton.addEventListener("click", () => {
+      const randomPath = generateRandomString(12);
+      goToPad(randomPath);
+    });
+
+    // Optional: Pressing "Enter" should also trigger the path creation
+    customPathInput.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        goToPadButton.click();
+      }
+    });
+  });
+
+  function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    toast.querySelector("span").textContent = message;
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 3000);
+  }
+</script>
+
+{% endblock %}

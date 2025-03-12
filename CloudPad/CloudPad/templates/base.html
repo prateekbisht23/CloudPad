@@ -23,6 +23,9 @@
       .editor-font {
         font-family: "JetBrains Mono", monospace;
       }
+      html {
+        scroll-behavior: smooth;
+      }
     </style>
     {% load static %}
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -58,11 +61,11 @@
       >
         <a href="/" class="text-2xl font-['Pacifico'] text-primary">CloudPad</a>
         <div class="flex items-center space-x-6">
-          <a href="#about" class="text-sm text-gray-600 hover:text-primary"
+          <a href="/about" class="text-sm text-gray-600 hover:text-primary"
             >About</a
           >
           <a
-            href="#how-it-works"
+            href="/?#how-it-works"
             class="text-sm text-gray-600 hover:text-primary"
             >How it works</a
           >
@@ -88,7 +91,11 @@
               >Terms of Service</a
             >
             <div class="flex items-center space-x-4">
-              <a href="#" class="text-gray-600 hover:text-primary">
+              <a
+                href="https://github.com/prateekbisht23/CloudPad"
+                target="_blank"
+                class="text-gray-600 hover:text-primary"
+              >
                 <div class="w-5 h-5 flex items-center justify-center">
                   <i class="ri-github-line"></i>
                 </div>
@@ -103,178 +110,5 @@
         </div>
       </div>
     </footer>
-
-    <script>
-
-      const homePage = document.getElementById("home-page");
-      const editorPage = document.getElementById("editor-page");
-      const createNewBtn = document.getElementById("create-new");
-      const path = window.location.pathname.substring(1);
-
-      createNewBtn.addEventListener("click", () => {
-        homePage.classList.add("hidden");
-        editorPage.classList.remove("hidden");
-        const randomId = Math.random().toString(36).substring(2, 15);
-        document.getElementById("dynamic-path").textContent = randomId;
-      });
-
-      if (path) {
-        homePage.classList.add("hidden");
-        editorPage.classList.remove("hidden");
-      } else {
-        homePage.classList.remove("hidden");
-        editorPage.classList.add("hidden");
-      }
-
-      // File Upload Handling
-      const uploadButton = document.getElementById("upload-button");
-      const fileInput = document.getElementById("file-input");
-      const uploadDialog = document.getElementById("upload-dialog");
-      const closeDialog = document.getElementById("close-dialog");
-      const dropZone = document.getElementById("drop-zone");
-      const browseFiles = document.getElementById("browse-files");
-      const cancelUpload = document.getElementById("cancel-upload");
-      const confirmUpload = document.getElementById("confirm-upload");
-      const uploadPreview = document.getElementById("upload-preview");
-      const fileList = document.getElementById("file-list");
-
-      uploadButton.addEventListener("click", () => {
-        uploadDialog.classList.remove("hidden");
-        uploadPreview.innerHTML = "";
-      });
-
-      closeDialog.addEventListener("click", () =>
-        uploadDialog.classList.add("hidden")
-      );
-      cancelUpload.addEventListener("click", () =>
-        uploadDialog.classList.add("hidden")
-      );
-      browseFiles.addEventListener("click", () => fileInput.click());
-
-      fileInput.addEventListener("change", (e) => {
-        Array.from(e.target.files).forEach((file) => {
-          if (validateFile(file)) {
-            addFileToPreview(file);
-          }
-        });
-      });
-
-      dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.classList.add("border-primary");
-      });
-
-      dropZone.addEventListener("dragleave", () =>
-        dropZone.classList.remove("border-primary")
-      );
-
-      dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.classList.remove("border-primary");
-        Array.from(e.dataTransfer.files).forEach((file) => {
-          if (validateFile(file)) {
-            addFileToPreview(file);
-          }
-        });
-      });
-
-      {% comment %} confirmUpload.addEventListener("click", () => {
-        const files = fileInput.files;
-        if (files.length === 0) {
-          showToast("No file selected!");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", files[0]); // Assuming one file per upload
-        formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
-
-        fetch("{% url 'upload_file' note.url_id %}", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.status === "success") {
-              showToast("File uploaded successfully!");
-              fetchUploadedFiles(); // Refresh file list
-            } else {
-              showToast("Upload failed!");
-            }
-          })
-          .catch(() => showToast("Error uploading file!"));
-      });
-
-      function fetchUploadedFiles() {
-        fetch("{% url 'get_uploaded_files' note.url_id %}")
-          .then((response) => response.json())
-          .then((data) => {
-            fileList.innerHTML = "";
-            if (data.file_url) {
-              const fileElement = document.createElement("div");
-              fileElement.innerHTML = `<a href="${data.file_url}" target="_blank">Download File</a>`;
-              fileList.appendChild(fileElement);
-            } else {
-              fileList.innerHTML = "<p>No files uploaded yet.</p>";
-            }
-          });
-      }
-
-      fetchUploadedFiles(); {% endcomment %}
-
-      function showToast(message, type = "success") {
-        const toast = document.getElementById("toast");
-        toast.querySelector("span").textContent = message;
-        toast.classList.remove("hidden");
-        setTimeout(() => toast.classList.add("hidden"), 3000);
-      }
-
-      function validateFile(file) {
-        const maxSize = 10 * 1024 * 1024;
-        const allowedTypes = [
-          "application/pdf",
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "text/plain",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ];
-        if (file.size > maxSize) {
-          showToast("File size exceeds 10MB limit", "error");
-          return false;
-        }
-        if (!allowedTypes.includes(file.type)) {
-          showToast("File type not supported", "error");
-          return false;
-        }
-        return true;
-      }
-
-      function addFileToPreview(file) {
-        const fileElement = document.createElement("div");
-        fileElement.innerHTML = `<div class='file-item'>${
-          file.name
-        } (${formatFileSize(file.size)})</div>`;
-        uploadPreview.appendChild(fileElement);
-      }
-
-      function formatFileSize(bytes) {
-        const sizes = ["Bytes", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
-      }
-
-      function addFileToList(file) {
-        const fileElement = document.createElement("div");
-        fileElement.innerHTML = `<div class='file-item'>
-            <a href="${file.url}" target="_blank">${file.name}</a> (${file.size})
-          </div>`;
-        fileList.appendChild(fileElement);
-      }
-
-      // Load files on page load
-      document.addEventListener("DOMContentLoaded", fetchFiles);
-    </script>
   </body>
 </html>

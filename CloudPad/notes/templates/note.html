@@ -88,7 +88,11 @@
         </div>
       </div>
       <textarea id="note-content" class="w-full p-4 editor-font text-gray-800 text-sm focus:outline-none" rows="16" placeholder="Start typing here...">
-        {{ note.content }}
+        {% if note.content and note.content != 'None' %}
+          {{ note.content|default:'' }}
+        {% else %}
+          {{ '' }}
+        {% endif %}
       </textarea>
     </div>
     <div id="file-list" class="space-y-2">
@@ -101,7 +105,7 @@
     <div class="w-5 h-5 flex items-center justify-center text-green-500">
       <i class="ri-checkbox-circle-line"></i>
     </div>
-    <span class="ml-2 text-sm text-gray-700">URL copied to clipboard!</span>
+    <span class="ml-2 text-sm text-gray-700"></span>
   </div>
 </div>
 
@@ -114,36 +118,46 @@
 
 
   document.addEventListener('DOMContentLoaded', () => {
-    let timeout = null;
+    let saveTimeout = null;
+    let fetchInterval = null;
     let lastFetchedContent = document.getElementById('note-content').value;
     let isTyping = false;
   
-    // Function to save the note
+    // Function to save the note (debounced)
     const saveNote = () => {
       const content = document.getElementById('note-content').value;
       const csrfToken = "{{ csrf_token }}"; // Django CSRF token
   
-      fetch("{% url 'save_note' note.url_id %}", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken=${csrfToken}`  
-      }).then(response => {
-        if (response.ok) {
-          document.getElementById('status').innerText = 'Saved';
-          isTyping = false;
-        }
-      }).catch(error => console.error('Failed to save note:', error));
+      if (content.trim() !== lastFetchedContent) {
+        fetch("{% url 'save_note' note.url_id %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken=${csrfToken}`
+        })
+          .then(response => {
+            if (response.ok) {
+              document.getElementById('status').innerText = 'Saved';
+              lastFetchedContent = content;
+              isTyping = false;
+            }
+          })
+          .catch(error => console.error('Failed to save note:', error));
+      }
     };
   
-    // Auto-save on input (debounced)
+    // Auto-save after user stops typing for 500ms
     document.getElementById('note-content').addEventListener('input', () => {
       isTyping = true;
-      clearTimeout(timeout);
+      clearTimeout(saveTimeout);
+  
       document.getElementById('status').innerText = 'Saving...';
   
-      timeout = setTimeout(saveNote, 800);
+      saveTimeout = setTimeout(() => {
+        saveNote();
+        isTyping = false;
+      }, 800);
     });
   
     // Function to fetch the latest note content
@@ -161,12 +175,30 @@
           .catch(error => console.error('Failed to fetch note:', error));
       }
     };
-    // Auto-fetch updated content every 3 seconds
-    setInterval(fetchNote, 3000);
-
+  
+    // Auto-fetch notes and files every 3 seconds
+    fetchInterval = setInterval(() => {
+      if (!isTyping) {
+        saveNote(); // First save the current state
+        fetchNote(); // Then fetch latest state
+      }
+    }, 3000);
+  
+    // Initial load
+    fetchNote();
     fetchFilesFromBucket();
 
+    const noteContent = document.getElementById('note-content');
+
+    // Remove leading/trailing whitespaces if present
+    if (noteContent.value.trim() === 'None') {
+      noteContent.value = '';
+    } else {
+      noteContent.value = noteContent.value.trim();
+    }
+
   });
+  
 
   const copyURL = document.getElementById('copy-url');
 
@@ -189,8 +221,7 @@
 
     navigator.clipboard.writeText(fullURL).then(() => {
       const toast = document.getElementById('toast');
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 2000);
+      showToast("URL copied to clipboard!!");
     }).catch(err => {
       console.error('Failed to copy URL:', err);
     });
@@ -280,7 +311,7 @@
     const files = fileInput.files;
 
     if (!files.length) {
-      alert("Please select files to upload.");
+      showToast("Please select files to upload.");
       return;
     }
 
@@ -300,12 +331,12 @@
         }
       } else {
         console.error("Error uploading files:", error.message);
-        alert(`Failed to upload files: ${error.message}`);
+        showToast(`Failed to upload files: ${error.message}`);
         return;
       }
     }
   
-    alert("Files uploaded successfully!");
+    showToast("Files uploaded successfully!");
     uploadDialog.classList.add('hidden');
     uploadPreview.innerHTML = ''; // Clear preview after upload
   });
@@ -358,7 +389,6 @@
     }
   
     if (!data.length) {
-      fileList.innerHTML = '<p class="text-gray-500">No files uploaded yet.</p>';
       return;
     }
   
@@ -366,22 +396,32 @@
     data.forEach((file) => {
       const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/cloudpad-files/${dynamicPath}/${file.name}`;
       
-      const fileElement = document.createElement('div');
-      fileElement.classList.add('flex', 'justify-between', 'items-center', 'py-2', 'border-b');
-  
-      fileElement.innerHTML = `
-        <a href="${fileUrl}" target="_blank" class="text-primary hover:underline truncate">
-          ${file.name}
-        </a>
-        <div class="flex items-center space-x-3">
-          <a href="${fileUrl}" target="_blank" download="${file.name}">
-            <i class="ri-download-line text-primary hover:text-blue-600 cursor-pointer"></i>
-          </a>
-          <i class="ri-close-line text-red-500 hover:text-red-700 cursor-pointer"
-            onclick="deleteFileFromBucket('${file.name}')">
-          </i>
-        </div>
-      `;
+      const fileElement = document.createElement("div");
+    fileElement.className =
+      "bg-white rounded shadow p-3 flex items-center justify-between";
+    fileElement.innerHTML = `
+  <div class="flex items-center space-x-2">
+  <button class="text-gray-600 hover:text-primary p-2 rounded-button cursor-pointer">
+  <div class="w-5 h-5 flex items-center justify-center">
+  <a href="${fileUrl}" target="_blank" download="${file.name}">
+    <i class="ri-download-line"></i>
+  </a>
+  </div>
+  </button>
+  <div class="w-8 h-8 flex items-center justify-center text-primary">
+  <i class="ri-file-${file.type}-line ri-lg"></i>
+  </div>
+  <div class="ml-3">
+
+  <div class="text-sm font-medium text-gray-700"><a href="${fileUrl}" target="_blank">${file.name}</a></div>
+  <div class="text-xs text-gray-500">${file.size}</div>
+  </div>
+  </div>
+  <button class="text-gray-600 hover:text-red-500 p-2 rounded-button cursor-pointer remove-file" onclick="deleteFileFromBucket('${file.name}')">
+  <div class="w-5 h-5 flex items-center justify-center">
+  <i class="ri-close-line"></i>
+  </div>
+  </button>`;
   
       fileList.appendChild(fileElement);
     });
@@ -401,7 +441,7 @@
             throw new Error(`Failed to delete file: ${error.message}`);
         }
 
-        alert(`"${fileName}" deleted successfully`, "success");
+        showToast(`"${fileName}" deleted successfully`, "success");
 
         // Refresh the file list after deletion
         fetchFilesFromBucket();
@@ -409,6 +449,14 @@
         console.error("Error deleting file:", error.message);
         showToast(`Failed to delete file: ${error.message}`, "error");
     }
+  }
+
+
+  function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    toast.querySelector("span").textContent = message;
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 3000);
   }
 
 

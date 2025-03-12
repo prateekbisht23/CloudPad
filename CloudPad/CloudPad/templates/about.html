@@ -1,0 +1,152 @@
+{% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %}
+{%block content %}
+
+<main class="flex-1 container mx-auto px-4 py-8">
+  <div id="about-page" class="max-w-4xl mx-auto">
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+      About <span class="underline decoration-primary underline-offset-4">CloudPad</span>
+    </h1>
+    <p class="text-lg text-gray-600 leading-relaxed mb-12">
+      Welcome to
+      <a href="/"><span class="text-primary font-semibold">CloudPad</span></a> —
+      a lightweight, real-time text and file-sharing platform designed to make
+      quick sharing effortless and secure. Built with simplicity and efficiency
+      in mind, CloudPad lets you create a unique URL where you can instantly
+      share text and files without the hassle of registration or logins.
+    </p>
+
+    <!-- About the Creator -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        👨‍💻 About the Creator
+      </h2>
+      <p class="text-gray-600 leading-relaxed">
+        Hi! I’m
+        <a
+          href="https://portfolio-git-main-prateekbisht23s-projects.vercel.app/"
+          target="_blank"
+          ><span class="font-semibold text-primary">Prateek Bisht</span></a
+        >, a passionate software developer and a final-year computer science
+        student. My journey into web development started with a curiosity for
+        how things work behind the scenes — from dynamic websites to AI-driven
+        applications.
+      </p>
+      <p class="mt-4 text-gray-600 leading-relaxed">
+        CloudPad is the result of combining my passion for building real-world
+        solutions with my technical expertise. I wanted to create something that
+        works instantly, with no friction — just a fast and reliable sharing
+        experience.
+      </p>
+    </section>
+
+    <!-- Inspiration -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        💡 Inspiration Behind CloudPad
+      </h2>
+      <p class="text-gray-600 leading-relaxed">
+        CloudPad was inspired by platforms like
+        <span class="font-semibold">Dontpad</span>, which offer quick text
+        sharing. However, I wanted to take it a step further by adding
+        file-sharing capabilities while maintaining a minimalist and intuitive
+        interface.
+      </p>
+      <ul class="list-disc pl-6 mt-4 text-gray-600">
+        <li>No registration required</li>
+        <li>Instant text and file-sharing</li>
+        <li>Secure and temporary storage</li>
+        <li>Simple and clean UI</li>
+      </ul>
+    </section>
+
+    <!-- How It Was Built -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        🚀 How I Built CloudPad
+      </h2>
+      <p class="text-gray-600 leading-relaxed">
+        CloudPad was built using modern web technologies:
+      </p>
+      <div class="grid grid-cols-2 gap-4 mt-6">
+        <div class="bg-white shadow-md rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-gray-900">Frontend</h3>
+          <p class="text-gray-600">HTML, CSS (Tailwind), JavaScript</p>
+        </div>
+        <div class="bg-white shadow-md rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-gray-900">Backend</h3>
+          <p class="text-gray-600">Django (Python)</p>
+        </div>
+        <div class="bg-white shadow-md rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Database & Storage
+          </h3>
+          <p class="text-gray-600">Supabase</p>
+        </div>
+        <div class="bg-white shadow-md rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-gray-900">Deployment</h3>
+          <p class="text-gray-600">Render</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Challenges -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        🧩 Challenges I Faced
+      </h2>
+      <ul class="list-disc pl-6 space-y-2 text-gray-600">
+        <li>
+          <span class="font-semibold">Real-Time Syncing:</span> Syncing file
+          uploads and text changes was tricky, but adjusting the Supabase setup
+          fixed it.
+        </li>
+        <li>
+          <span class="font-semibold">File Handling:</span> Uploading files and
+          setting permissions on Supabase required fine-tuning.
+        </li>
+        <li>
+          <span class="font-semibold">UI Consistency:</span> Making the UI
+          responsive across devices took several iterations.
+        </li>
+        <li>
+          <span class="font-semibold">Bucket Permissions:</span> Fixing Supabase
+          permissions ensured secure and consistent access.
+        </li>
+      </ul>
+    </section>
+
+    <!-- Support -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        🌟 Support the Project
+      </h2>
+      <p class="text-gray-600 leading-relaxed">
+        If you found CloudPad useful, please consider **starring the GitHub
+        repository**! Your support helps me improve the project and add new
+        features.
+      </p>
+      <div class="mt-4">
+        <a
+          href="https://github.com/prateekbisht23/cloudpad"
+          target="_blank"
+          class="bg-primary text-white px-6 py-3 rounded-button hover:bg-opacity-90 inline-block"
+        >
+          ⭐ Star on GitHub
+        </a>
+      </div>
+    </section>
+
+    <!-- Closing -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">🙌 Thank You!</h2>
+      <p class="text-gray-600 leading-relaxed">
+        I hope CloudPad makes your life a little easier when it comes to sharing
+        text and files quickly and securely. If you have any feedback or
+        suggestions, feel free to reach out — I'm always open to improving the
+        platform! 😎
+      </p>
+    </section>
+  </div>
+</main>
+
+{% endblock %}
