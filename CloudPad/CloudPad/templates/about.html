@@ -4,7 +4,10 @@
 <main class="flex-1 container mx-auto px-4 py-8">
   <div id="about-page" class="max-w-4xl mx-auto">
     <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-      About <span class="underline decoration-primary underline-offset-4">CloudPad</span>
+      About
+      <span class="underline decoration-primary underline-offset-4"
+        >CloudPad</span
+      >
     </h1>
     <p class="text-lg text-gray-600 leading-relaxed mb-12">
       Welcome to
@@ -16,7 +19,7 @@
     </p>
 
     <!-- About the Creator -->
-    <section class="mb-16">
+    <section class="mb-16 relative">
       <h2 class="text-2xl font-bold text-gray-900 mb-4">
         👨‍💻 About the Creator
       </h2>
@@ -25,8 +28,13 @@
         <a
           href="https://portfolio-git-main-prateekbisht23s-projects.vercel.app/"
           target="_blank"
-          ><span class="font-semibold text-primary">Prateek Bisht</span></a
-        >, a passionate software developer and a final-year computer science
+          ><span
+            id="profile-name"
+            class="font-semibold text-primary hover:underline"
+            >Prateek Bisht</span
+          ></a
+        >
+        , a passionate software developer and a final-year computer science
         student. My journey into web development started with a curiosity for
         how things work behind the scenes — from dynamic websites to AI-driven
         applications.
@@ -37,6 +45,17 @@
         works instantly, with no friction — just a fast and reliable sharing
         experience.
       </p>
+
+      <div
+        id="profile-img"
+        class="fixed w-10 h-10 rounded-full bg-black overflow-hidden opacity-0 invisible transition-opacity duration-300 transform"
+      >
+        <img
+          src="https://portfolio-git-main-prateekbisht23s-projects.vercel.app/profile-pic.png"
+          alt="Profile Pic"
+          class="w-full h-full object-cover"
+        />
+      </div>
     </section>
 
     <!-- Inspiration -->
@@ -148,5 +167,30 @@
     </section>
   </div>
 </main>
+
+<script>
+  const name = document.getElementById("profile-name");
+  const image = document.getElementById("profile-img");
+
+  // Show image on hover
+  name.addEventListener("mouseenter", () => {
+    image.classList.remove("opacity-0", "invisible");
+    image.classList.add("opacity-100");
+  });
+
+  name.addEventListener("mouseleave", () => {
+    image.classList.add("opacity-0", "invisible");
+    image.classList.remove("opacity-100");
+  });
+
+  name.addEventListener("mousemove", (e) => {
+    const { clientX, clientY } = e;
+
+    image.style.left = `${clientX + 6}px`;
+    image.style.top = `${clientY - 50}px`;
+
+    image.style.transform = `translate(0, 0) scale(1.05)`;
+  });
+</script>
 
 {% endblock %}
