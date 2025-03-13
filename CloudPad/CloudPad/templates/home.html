@@ -1,8 +1,8 @@
 {% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %}
 {%block content %}
 
-<main class="flex-1 container mx-auto px-4 py-8">
-  <div id="home-page" class="max-w-6xl mx-auto">
+<main class="flex-1 container mx-auto px-4 py-8 overflow-x-hidden">
+  <div id="home-page" class="max-w-6xl mx-auto overflow-x-hidden">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-10 mb-16">
       <div class="space-y-6">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
@@ -15,17 +15,18 @@
           typing or upload files, and share instantly — no accounts, no hassle.
         </p>
         <div class="bg-white shadow-lg rounded-lg p-6 space-y-4">
-          <div class="flex items-center">
+          <!-- Fixed alignment using flex and w-full -->
+          <div class="flex items-center space-x-2 w-full">
             <span class="text-gray-500 text-lg">cloudpad.io/</span>
             <input
               type="text"
               id="custom-path"
-              class="flex-1 bg-transparent border-none text-primary text-lg focus:outline-none"
-              placeholder="your-secure-pad"
+              class="flex-1 bg-transparent border-none text-primary text-lg focus:outline-none w-full"
+              placeholder="your-unique-pad"
             />
             <button
               id="go-to-pad"
-              class="ml-2 bg-primary text-white px-6 py-3 rounded-button hover:bg-opacity-90 text-lg"
+              class="bg-primary text-white px-2.5 py-1.5 sm:px-6 sm:py-3 rounded-button hover:bg-opacity-90 text-base sm:text-lg whitespace-nowrap"
             >
               Create Pad
             </button>
@@ -40,14 +41,17 @@
           </div>
         </div>
       </div>
-      <div class="relative">
+
+      <!-- Hide image on smaller screens -->
+      <div class="relative hidden sm:block">
         <img
           src="https://public.readdy.ai/ai/img_res/19aa870e3ae109821c05c1df520f110c.jpg"
           alt="CloudPad Illustration"
-          class="w-full rounded-lg shadow-xl"
+          class="w-full max-w-full object-cover rounded-xl shadow-2xl"
         />
       </div>
     </div>
+
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
       <div class="bg-white rounded-lg shadow-lg p-6">
         <div
@@ -105,16 +109,15 @@
             <i class="ri-user-add-line"></i>
           </div>
         </div>
-        <div class="relative">
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">
-            No Sign-Up Required
-          </h3>
-          <p class="text-gray-600">
-            Get started immediately without creating an account.
-          </p>
-        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          No Sign-Up Required
+        </h3>
+        <p class="text-gray-600">
+          Get started immediately without creating an account.
+        </p>
       </div>
     </div>
+
     <div
       id="how-it-works"
       class="bg-white rounded-lg shadow-lg p-8 mb-16 scroll-mt-20"
@@ -187,11 +190,13 @@
             </div>
           </div>
         </div>
-        <div class="relative">
+
+        <!-- Hide image on smaller screens -->
+        <div class="relative hidden sm:block">
           <img
             src="https://public.readdy.ai/ai/img_res/da576bce5f1811562dea720aec951975.jpg"
             alt="How CloudPad Works"
-            class="w-full rounded-xl shadow-2xl"
+            class="w-full max-w-full object-cover rounded-xl shadow-2xl"
           />
           <div
             class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-xl"

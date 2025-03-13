@@ -2,36 +2,6 @@
 
 {% block content %}
 <main class="flex-1 container mx-auto px-4 py-8">
-  {% comment %} <div id="home-page" class="max-w-4xl mx-auto space-y-6">
-    <div class="text-center space-y-4 mb-8">
-      <h1 class="text-4xl font-bold text-gray-900">Share Text & Files Anonymously</h1>
-      <p class="text-xl text-gray-600">No registration required. Just start typing and share instantly.</p>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <div class="bg-white rounded-lg shadow p-6 text-center">
-        <div class="w-12 h-12 mx-auto mb-4 text-primary">
-          <i class="ri-lock-line ri-2x"></i>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Private & Secure</h3>
-        <p class="text-gray-600">Your data is encrypted and automatically deleted after 7 days</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-6 text-center">
-        <div class="w-12 h-12 mx-auto mb-4 text-primary">
-          <i class="ri-file-text-line ri-2x"></i>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">File Support</h3>
-        <p class="text-gray-600">Upload and share multiple file types up to 10MB each</p>
-      </div>
-      <div class="bg-white rounded-lg shadow p-6 text-center">
-        <div class="w-12 h-12 mx-auto mb-4 text-primary">
-          <i class="ri-share-line ri-2x"></i>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Instant Sharing</h3>
-        <p class="text-gray-600">Get a unique URL to share your content immediately</p>
-      </div>
-    </div>
-    <button id="create-new" class="w-full bg-primary text-white py-4 rounded-button hover:bg-opacity-90 text-lg font-medium">Create New Pad</button>
-  </div> {% endcomment %}
   <div id="editor-page" class="max-w-4xl mx-auto space-y-6">
     <div class="bg-white rounded shadow p-4 flex items-center">
       <div class="flex-1 bg-blue-50 rounded px-3 py-2 editor-font text-sm">
@@ -56,7 +26,7 @@
             </button>
             <span class="text-sm text-gray-500">Max file size: 10MB</span>
           </div>
-          <div id="upload-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+          <div id="upload-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 !ml-0">
             <div class="bg-white rounded-lg p-6 w-full max-w-lg">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-medium text-gray-900">Upload Files</h3>
@@ -339,6 +309,9 @@
     showToast("Files uploaded successfully!");
     uploadDialog.classList.add('hidden');
     uploadPreview.innerHTML = ''; // Clear preview after upload
+
+    fetchFilesFromBucket();
+
   });
 
   async function createSubBucket(dynamicPath) {
