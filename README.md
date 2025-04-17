@@ -1,8 +1,8 @@
 # CloudPad
 
-**CloudPad** is a lightweight, real-time text and file-sharing platform inspired by Dontpad. It allows users to create unique URLs where they can instantly share text and files with others. Unlike traditional storage platforms, CloudPad is designed for quick, temporary sharing, with automatic deletion of inactive notes.
+**CloudPad** is a lightweight, real-time text and file-sharing platform inspired by Dontpad. It allows users to create unique URLs where they can instantly share text and files with other devices by simply opening the same url in that device. Unlike traditional storage platforms, CloudPad is designed for quick, temporary sharing.
 
-🚨 **Note:** CloudPad is now live! Real-time text sharing and file uploads are fully functional, with automatic expiration after 7 days.
+🚨 **Note:** CloudPad is now live! Real-time text sharing and file uploads are fully functional.
 
 👉 **[Visit CloudPad](https://cloudpad-mya5.onrender.com/)**  
 
@@ -13,7 +13,6 @@
 - **Instant Text Sharing** – Start typing, and your text is saved in real time.  
 - **File Upload Support** – Upload and share PDFs, Word documents, images, and audio files.  
 - **Dynamic URL-Based Notes** – Create and access shared notes using custom URLs.  
-- **Auto-Deletion of Inactive Notes** – Notes and files are deleted after **7 days** of inactivity.  
 - **Lightweight and Fast** – Built with **Django** and **Supabase**, optimized for speed.  
 - **No Account Required** – Share content instantly without signing up.  
 
@@ -35,7 +34,6 @@
 3. **Start Typing** – Your text is saved in real time.  
 4. **Upload Files** – Upload PDFs, images, and more directly to the note.  
 5. **Share the URL** – Others can instantly see and edit the text and files.  
-6. **Auto-Deletion** – If a note remains inactive for **7 days**, it is automatically deleted.  
 
 ---
 
