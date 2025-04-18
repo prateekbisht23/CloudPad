@@ -1,6 +1,6 @@
 # CloudPad
 
-**CloudPad** is a lightweight, real-time text and file-sharing platform inspired by Dontpad. It allows users to create unique URLs where they can instantly share text and files with other devices by simply opening the same url in that device. Unlike traditional storage platforms, CloudPad is designed for quick, temporary sharing.
+**CloudPad** is a lightweight, real-time text and file-sharing platform inspired by Dontpad. It allows users to create unique URLs where they can instantly share text and files with other devices by simply opening the same url on both the devices. Unlike traditional storage platforms, CloudPad is designed for quick, temporary sharing.
 
 🚨 **Note:** CloudPad is now live! Real-time text sharing and file uploads are fully functional.
 
