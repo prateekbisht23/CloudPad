@@ -71,7 +71,7 @@ Contributions are welcome! Feel free to fork the repository, open issues, or sub
 For any queries or suggestions, feel free to reach out:
 
 - **GitHub:** [@prateekbisht23](https://github.com/prateekbisht23)  
-- **Email:** [your.email@example.com](mailto:prateekbisht04@gmail.com)  
+- **Email:** [prateekbisht04@gmail.com](mailto:prateekbisht04@gmail.com)  
 
 ---
 
