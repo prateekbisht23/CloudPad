@@ -84,12 +84,8 @@ load_dotenv()
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.rpwmcpmrzfveosdcvwjz',
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': 'aws-0-ap-south-1.pooler.supabase.com',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
