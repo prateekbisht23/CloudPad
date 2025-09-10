@@ -1,0 +1,332 @@
+{% extends "base.html" %} 
+{% block title %}Repository Finder - CloudPad{% endblock %}
+
+{% block content %}
+<main class="flex-1 container mx-auto px-4 py-8">
+  <div class="max-w-6xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="text-center space-y-4">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900">
+        Find <span class="text-primary">Trending Repositories</span>
+      </h1>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Discover contribution-friendly repositories with active maintainers, good first issues, and welcoming communities.
+      </p>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Search Filters</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Programming Language -->
+        <div class="space-y-2">
+          <label for="language" class="block text-sm font-medium text-gray-700">
+            Programming Language
+          </label>
+          <select 
+            id="language" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">Any Language</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="typescript">TypeScript</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
+            <option value="cpp">C++</option>
+            <option value="c">C</option>
+            <option value="csharp">C#</option>
+            <option value="php">PHP</option>
+            <option value="ruby">Ruby</option>
+            <option value="swift">Swift</option>
+            <option value="kotlin">Kotlin</option>
+            <option value="dart">Dart</option>
+            <option value="r">R</option>
+            <option value="shell">Shell</option>
+          </select>
+        </div>
+
+        <!-- Topic -->
+        <div class="space-y-2">
+          <label for="topic" class="block text-sm font-medium text-gray-700">
+            Topic/Area
+          </label>
+          <select 
+            id="topic" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">Any Topic</option>
+            <option value="web-development">Web Development</option>
+            <option value="machine-learning">Machine Learning</option>
+            <option value="data-science">Data Science</option>
+            <option value="mobile">Mobile Development</option>
+            <option value="devops">DevOps</option>
+            <option value="frontend">Frontend</option>
+            <option value="backend">Backend</option>
+            <option value="api">API</option>
+            <option value="cli">CLI Tools</option>
+            <option value="game-development">Game Development</option>
+            <option value="security">Security</option>
+            <option value="blockchain">Blockchain</option>
+            <option value="iot">IoT</option>
+            <option value="documentation">Documentation</option>
+            <option value="beginner-friendly">Beginner Friendly</option>
+          </select>
+        </div>
+
+        <!-- Minimum Stars -->
+        <div class="space-y-2">
+          <label for="min_stars" class="block text-sm font-medium text-gray-700">
+            Minimum Stars
+          </label>
+          <select 
+            id="min_stars" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="10">10+ stars</option>
+            <option value="50">50+ stars</option>
+            <option value="100">100+ stars</option>
+            <option value="500">500+ stars</option>
+            <option value="1000">1000+ stars</option>
+            <option value="5000">5000+ stars</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Search Button -->
+      <div class="mt-6 text-center">
+        <button 
+          id="search-btn" 
+          class="bg-primary text-white px-8 py-3 rounded-lg hover:bg-opacity-90 font-medium text-lg"
+        >
+          <span id="search-text">Find Repositories</span>
+          <div id="search-spinner" class="hidden inline-block ml-2">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="hidden text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <p class="mt-4 text-gray-600">Searching for repositories...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-6">
+      <div class="flex items-center">
+        <div class="w-6 h-6 text-red-500">
+          <i class="ri-error-warning-line"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <p id="error-message" class="text-sm text-red-700 mt-1"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden space-y-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-semibold text-gray-900">
+          Contribution-Friendly Repositories
+        </h2>
+        <p class="text-gray-600 mt-2">
+          Here are some great repositories looking for contributors
+        </p>
+      </div>
+      
+      <div id="repositories" class="grid gap-6">
+        <!-- Repository cards will be inserted here -->
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div id="no-results" class="hidden text-center py-12">
+      <div class="w-16 h-16 mx-auto text-gray-400 mb-4">
+        <i class="ri-search-line ri-3x"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No repositories found</h3>
+      <p class="text-gray-600">
+        Try adjusting your search filters or choosing different criteria.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchBtn = document.getElementById('search-btn');
+  const searchText = document.getElementById('search-text');
+  const searchSpinner = document.getElementById('search-spinner');
+  const loading = document.getElementById('loading');
+  const error = document.getElementById('error');
+  const errorMessage = document.getElementById('error-message');
+  const results = document.getElementById('results');
+  const repositories = document.getElementById('repositories');
+  const noResults = document.getElementById('no-results');
+
+  searchBtn.addEventListener('click', function() {
+    const language = document.getElementById('language').value;
+    const topic = document.getElementById('topic').value;
+    const minStars = document.getElementById('min_stars').value;
+
+    // Show loading state
+    searchText.textContent = 'Searching...';
+    searchSpinner.classList.remove('hidden');
+    searchBtn.disabled = true;
+    loading.classList.remove('hidden');
+    error.classList.add('hidden');
+    results.classList.add('hidden');
+    noResults.classList.add('hidden');
+
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (language) params.append('language', language);
+    if (topic) params.append('topic', topic);
+    if (minStars) params.append('min_stars', minStars);
+
+    // Make API request
+    fetch(`/api/find-repositories/?${params.toString()}`)
+      .then(response => response.json())
+      .then(data => {
+        // Reset button state
+        searchText.textContent = 'Find Repositories';
+        searchSpinner.classList.add('hidden');
+        searchBtn.disabled = false;
+        loading.classList.add('hidden');
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        if (data.repositories && data.repositories.length > 0) {
+          displayRepositories(data.repositories);
+          results.classList.remove('hidden');
+        } else {
+          noResults.classList.remove('hidden');
+        }
+      })
+      .catch(err => {
+        // Reset button state
+        searchText.textContent = 'Find Repositories';
+        searchSpinner.classList.add('hidden');
+        searchBtn.disabled = false;
+        loading.classList.add('hidden');
+
+        // Show error
+        errorMessage.textContent = err.message || 'An error occurred while searching for repositories.';
+        error.classList.remove('hidden');
+      });
+  });
+
+  function displayRepositories(repos) {
+    repositories.innerHTML = '';
+    
+    repos.forEach(repo => {
+      const repoCard = createRepositoryCard(repo);
+      repositories.appendChild(repoCard);
+    });
+  }
+
+  function createRepositoryCard(repo) {
+    const div = document.createElement('div');
+    div.className = 'bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow';
+    
+    // Format date
+    const updatedDate = new Date(repo.updated_at).toLocaleDateString();
+    
+    // Create topics HTML
+    const topicsHtml = repo.topics.slice(0, 5).map(topic => 
+      `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${topic}</span>`
+    ).join(' ');
+
+    div.innerHTML = `
+      <div class="flex items-start justify-between mb-4">
+        <div class="flex-1">
+          <div class="flex items-center mb-2">
+            <img src="${repo.owner.avatar_url}" alt="${repo.owner.login}" class="w-6 h-6 rounded-full mr-2">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <a href="${repo.html_url}" target="_blank" class="hover:text-primary">
+                ${repo.full_name}
+              </a>
+            </h3>
+          </div>
+          <p class="text-gray-600 mb-3">${repo.description}</p>
+          
+          ${topicsHtml ? `<div class="mb-3 space-x-1">${topicsHtml}</div>` : ''}
+          
+          <div class="flex items-center space-x-4 text-sm text-gray-500">
+            ${repo.language ? `
+              <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-primary mr-1"></div>
+                ${repo.language}
+              </div>
+            ` : ''}
+            <div class="flex items-center">
+              <i class="ri-star-line mr-1"></i>
+              ${repo.stargazers_count.toLocaleString()}
+            </div>
+            <div class="flex items-center">
+              <i class="ri-git-fork-line mr-1"></i>
+              ${repo.forks_count.toLocaleString()}
+            </div>
+            <div class="flex items-center">
+              <i class="ri-error-warning-line mr-1"></i>
+              ${repo.open_issues_count} issues
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t pt-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div class="text-center">
+            <div class="font-semibold text-green-600">${repo.good_first_issues || 0}</div>
+            <div class="text-gray-500">Good First Issues</div>
+          </div>
+          <div class="text-center">
+            <div class="font-semibold text-blue-600">${repo.help_wanted_issues || 0}</div>
+            <div class="text-gray-500">Help Wanted</div>
+          </div>
+          <div class="text-center">
+            <div class="font-semibold ${repo.has_contributing_guide ? 'text-green-600' : 'text-gray-400'}">
+              ${repo.has_contributing_guide ? '✓' : '✗'}
+            </div>
+            <div class="text-gray-500">Contributing Guide</div>
+          </div>
+          <div class="text-center">
+            <div class="font-semibold ${repo.has_code_of_conduct ? 'text-green-600' : 'text-gray-400'}">
+              ${repo.has_code_of_conduct ? '✓' : '✗'}
+            </div>
+            <div class="text-gray-500">Code of Conduct</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4 pt-4 border-t">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Updated: ${updatedDate}</span>
+          <a 
+            href="${repo.html_url}" 
+            target="_blank" 
+            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 text-sm font-medium"
+          >
+            View Repository
+          </a>
+        </div>
+      </div>
+    `;
+    
+    return div;
+  }
+
+  // Trigger initial search
+  searchBtn.click();
+});
+</script>
+
+{% endblock %}
