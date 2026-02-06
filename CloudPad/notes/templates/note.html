@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %} 
+{% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %}
 
 {% block content %}
 <main class="flex-1 container mx-auto px-4 py-8">
@@ -18,7 +18,8 @@
       <div class="border-b px-4 py-3 flex items-center justify-between">
         <div class="flex items-center space-x-4">
           <div class="relative flex justify-center items-center gap-1.5">
-            <input type="file" id="file-input" class="hidden" multiple accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" />
+            <input type="file" id="file-input" class="hidden" multiple
+              accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" />
             <button id="upload-button" class="text-lg text-gray-600 hover:text-primary cursor-pointer">
               <div class="w-5 h-5 flex items-center justify-center">
                 <i class="ri-attachment-line"></i>
@@ -26,7 +27,8 @@
             </button>
             <span class="text-sm text-gray-500">Max file size: 10MB</span>
           </div>
-          <div id="upload-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 !ml-0">
+          <div id="upload-dialog"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 !ml-0">
             <div class="bg-white rounded-lg p-6 w-full max-w-lg">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-medium text-gray-900">Upload Files</h3>
@@ -47,8 +49,11 @@
               </div>
               <div id="upload-preview" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div>
               <div class="flex justify-end mt-4 space-x-3">
-                <button id="cancel-upload" class="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-button whitespace-nowrap">Cancel</button>
-                <button id="confirm-upload" class="px-4 py-2 bg-primary text-white rounded-button hover:bg-opacity-90 whitespace-nowrap">Upload Files</button>
+                <button id="cancel-upload"
+                  class="px-4 py-2 text-gray-700 hover:text-gray-900 rounded-button whitespace-nowrap">Cancel</button>
+                <button id="confirm-upload"
+                  class="px-4 py-2 bg-primary text-white rounded-button hover:bg-opacity-90 whitespace-nowrap">Upload
+                  Files</button>
               </div>
             </div>
           </div>
@@ -57,7 +62,8 @@
           Saved!
         </div>
       </div>
-      <textarea id="note-content" class="w-full p-4 editor-font text-gray-800 text-sm focus:outline-none" rows="16" placeholder="Start typing here...">
+      <textarea id="note-content" class="w-full p-4 editor-font text-gray-800 text-sm focus:outline-none" rows="16"
+        placeholder="Start typing here...">
         {% if note.content and note.content != 'None' %}
           {{ note.content|default:'' }}
         {% else %}
@@ -81,8 +87,8 @@
 
 <script>
 
-  const SUPABASE_URL = 'https://rpwmcpmrzfveosdcvwjz.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwd21jcG1yemZ2ZW9zZGN2d2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODAxNTksImV4cCI6MjA1NTk1NjE1OX0.FDafYWgJbHN8AktZ202GJrBhDX_hM2NUqAyHLBAwtC8';
+  const SUPABASE_URL = '{{ SUPABASE_URL|safe }}';
+  const SUPABASE_KEY = '{{ SUPABASE_KEY|safe }}';
 
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -92,12 +98,12 @@
     let fetchInterval = null;
     let lastFetchedContent = document.getElementById('note-content').value;
     let isTyping = false;
-  
+
     // Function to save the note (debounced)
     const saveNote = () => {
       const content = document.getElementById('note-content').value;
       const csrfToken = "{{ csrf_token }}"; // Django CSRF token
-  
+
       if (content.trim() !== lastFetchedContent) {
         fetch("{% url 'save_note' note.url_id %}", {
           method: 'POST',
@@ -116,20 +122,20 @@
           .catch(error => console.error('Failed to save note:', error));
       }
     };
-  
+
     // Auto-save after user stops typing for 500ms
     document.getElementById('note-content').addEventListener('input', () => {
       isTyping = true;
       clearTimeout(saveTimeout);
-  
+
       document.getElementById('status').innerText = 'Saving...';
-  
+
       saveTimeout = setTimeout(() => {
         saveNote();
         isTyping = false;
       }, 800);
     });
-  
+
     // Function to fetch the latest note content
     const fetchNote = () => {
       if (!isTyping) {
@@ -145,7 +151,7 @@
           .catch(error => console.error('Failed to fetch note:', error));
       }
     };
-  
+
     // Auto-fetch notes and files every 3 seconds
     fetchInterval = setInterval(() => {
       if (!isTyping) {
@@ -153,7 +159,7 @@
         fetchNote(); // Then fetch latest state
       }
     }, 3000);
-  
+
     // Initial load
     fetchNote();
     fetchFilesFromBucket();
@@ -168,7 +174,7 @@
     }
 
   });
-  
+
 
   const copyURL = document.getElementById('copy-url');
 
@@ -184,7 +190,7 @@
   const confirmUpload = document.getElementById("confirm-upload");
 
   copyURL.addEventListener('click', () => {
-    const baseURL = 'http://cloudpad-mya5.onrender.com/';
+    const baseURL = '{{ BASE_URL|safe }}';
     const dynamicPath = document.getElementById('dynamic-path').innerText;
 
     const fullURL = `${baseURL}${dynamicPath}`;
@@ -201,7 +207,7 @@
     uploadDialog.classList.remove("hidden");
     uploadPreview.innerHTML = "";
   });
-  
+
   closeDialog.addEventListener('click', () => {
     uploadDialog.classList.add("hidden");
   });
@@ -263,9 +269,8 @@
 
   function addFileToPreview(file) {
     const fileElement = document.createElement("div");
-    fileElement.innerHTML = `<div class='pl-4'>${
-      file.name
-    } (${formatFileSize(file.size)})</div>`;
+    fileElement.innerHTML = `<div class='pl-4'>${file.name
+      } (${formatFileSize(file.size)})</div>`;
     uploadPreview.appendChild(fileElement);
   }
 
@@ -294,7 +299,7 @@
       if (error.statusCode === '404') {
         console.log("Sub-bucket doesn't exist — creating it...");
         await createSubBucket(dynamicPath);
-        
+
         // Retry uploading after creating the bucket
         for (const file of files) {
           await uploadFileToBucket(dynamicPath, file);
@@ -305,7 +310,7 @@
         return;
       }
     }
-  
+
     showToast("Files uploaded successfully!");
     uploadDialog.classList.add('hidden');
     uploadPreview.innerHTML = ''; // Clear preview after upload
@@ -321,22 +326,22 @@
       .upload(`${dynamicPath}/.placeholder`, new Blob([]), {
         upsert: false // Don't overwrite if it already exists
       });
-  
+
     if (error && error.statusCode !== '409') {
       throw new Error(`Failed to create sub-bucket: ${error.message}`);
     }
-  }  
+  }
 
   async function uploadFileToBucket(dynamicPath, file) {
     const filePath = `${dynamicPath}/${file.name}`;
-  
+
     const { data, error } = await supabase
       .storage
       .from('cloudpad-files') // Parent bucket name
       .upload(filePath, file, {
         upsert: true // Overwrites existing files
       });
-  
+
     if (error) {
       throw new Error(`Failed to upload file: ${file.name} - ${error.message}`);
     }
@@ -345,34 +350,34 @@
   async function fetchFilesFromBucket() {
     const dynamicPath = document.getElementById('dynamic-path').innerText;
     const fileList = document.getElementById('file-list');
-  
+
     // Clear existing files before fetching new ones
     fileList.innerHTML = '';
-  
+
     // 👇 Get list of files from the sub-bucket
     const { data, error } = await supabase
       .storage
       .from('cloudpad-files')
       .list(dynamicPath);
-  
+
     if (error) {
       console.error('Failed to load files:', error.message);
       fileList.innerHTML = '<p class="text-gray-500">Failed to load files.</p>';
       return;
     }
-  
+
     if (!data.length) {
       return;
     }
-  
+
     // 🎯 Display the files in the UI
     data.forEach((file) => {
       const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/cloudpad-files/${dynamicPath}/${file.name}`;
-      
+
       const fileElement = document.createElement("div");
-    fileElement.className =
-      "bg-white rounded shadow p-3 flex items-center justify-between";
-    fileElement.innerHTML = `
+      fileElement.className =
+        "bg-white rounded shadow p-3 flex items-center justify-between";
+      fileElement.innerHTML = `
   <div class="flex items-center space-x-2">
   <button class="text-gray-600 hover:text-primary p-2 rounded-button cursor-pointer">
   <div class="w-5 h-5 flex items-center justify-center">
@@ -395,32 +400,32 @@
   <i class="ri-close-line"></i>
   </div>
   </button>`;
-  
+
       fileList.appendChild(fileElement);
     });
   }
-  
+
   async function deleteFileFromBucket(fileName) {
     const dynamicPath = document.getElementById('dynamic-path').innerText;
     const filePath = `${dynamicPath}/${fileName}`;
 
     try {
-        const { error } = await supabase
-            .storage
-            .from('cloudpad-files')
-            .remove([filePath]);
+      const { error } = await supabase
+        .storage
+        .from('cloudpad-files')
+        .remove([filePath]);
 
-        if (error) {
-            throw new Error(`Failed to delete file: ${error.message}`);
-        }
+      if (error) {
+        throw new Error(`Failed to delete file: ${error.message}`);
+      }
 
-        showToast(`"${fileName}" deleted successfully`, "success");
+      showToast(`"${fileName}" deleted successfully`, "success");
 
-        // Refresh the file list after deletion
-        fetchFilesFromBucket();
+      // Refresh the file list after deletion
+      fetchFilesFromBucket();
     } catch (error) {
-        console.error("Error deleting file:", error.message);
-        showToast(`Failed to delete file: ${error.message}`, "error");
+      console.error("Error deleting file:", error.message);
+      showToast(`Failed to delete file: ${error.message}`, "error");
     }
   }
 
