@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import Note
@@ -10,7 +11,13 @@ def about(request):
 
 def note_view(request, url_id):
     note, created = Note.objects.get_or_create(url_id = url_id)
-    return render(request, 'note.html', {'note':note})
+    context = {
+        'note': note,
+        'SUPABASE_URL': os.getenv('SUPABASE_URL'),
+        'SUPABASE_KEY': os.getenv('SUPABASE_KEY'),
+        'BASE_URL': os.getenv('BASE_URL'),
+    }
+    return render(request, 'note.html', context)
 
 def save_note(request, url_id):
     if request.method == "POST":
