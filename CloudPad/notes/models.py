@@ -38,6 +38,7 @@ class Note(models.Model):
     )
     content = models.TextField(
         blank=True,
+        null=True,
         default='',
         help_text="Text content of the note"
     )
