@@ -1,2 +1,79 @@
-# Ignore environment variables
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# Environment
 .env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Compiled files
+*.pyc
+*.pyo
+
+#  Backup files
+*.bak
+*.swp
+*.swo
+*~
+
+# Node (if adding frontend build tools later)
+node_modules/
+npm-debug.log
+yarn-error.log
