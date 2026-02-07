@@ -1,4 +1,7 @@
-{% extends "base.html" %} {% block title %}CloudPad - Notes{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}CloudPad - Notes{% endblock %}
 
 {% block content %}
 <main class="flex-1 container mx-auto px-4 py-8">
@@ -85,83 +88,71 @@
   </div>
 </div>
 
-<script>
+<!-- Supabase (for file uploads) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- Yjs (Local Bundle - Verified) -->
+<script src="{% static 'js/yjs-bundle.js' %}?v=3"></script>
+
+<!-- Yjs Editor Logic -->
+<script type="module">
+  // Import Yjs Editor
+  import { YjsEditor } from '{% static "js/yjs-editor.js" %}?v=3';
+
+  // Supabase config for file uploads only
   const SUPABASE_URL = '{{ SUPABASE_URL|safe }}';
   const SUPABASE_KEY = '{{ SUPABASE_KEY|safe }}';
-
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
   document.addEventListener('DOMContentLoaded', () => {
-    let saveTimeout = null;
-    let fetchInterval = null;
-    let lastFetchedContent = document.getElementById('note-content').value;
-    let isTyping = false;
+    // Initialize Yjs for real-time collaboration
+    const yjsEditor = new YjsEditor({
+      wsUrl: '{{ YJS_WS_URL|safe }}',
+      documentName: 'note-{{ note.url_id }}',
+      textarea: document.getElementById('note-content'),
+      statusElement: document.getElementById('status'),
+      onReady: () => {
+        console.log('[CloudPad] Real-time editor ready');
+      },
+      onSync: (isSynced) => {
+        if (isSynced) {
+          console.log('[CloudPad] Document synced');
+          // Optional: Persist to Django backend periodically
+          persistToBackend();
+        }
+      },
+      onError: (error) => {
+        console.error('[CloudPad] Editor error:', error);
+        document.getElementById('status').innerText = 'Connection Error';
+        document.getElementById('status').className = 'text-red-600';
+      }
+    });
 
-    // Function to save the note (debounced)
-    const saveNote = () => {
-      const content = document.getElementById('note-content').value;
-      const csrfToken = "{{ csrf_token }}"; // Django CSRF token
+    // Persist to Django backend every 30 seconds (optional backup)
+    let persistTimer = null;
+    function persistToBackend() {
+      clearTimeout(persistTimer);
+      persistTimer = setTimeout(() => {
+        const content = yjsEditor.getContent();
 
-      if (content.trim() !== lastFetchedContent) {
         fetch("{% url 'save_note' note.url_id %}", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken=${csrfToken}`
+          body: `content=${encodeURIComponent(content)}&csrfmiddlewaretoken={{ csrf_token }}`
         })
           .then(response => {
             if (response.ok) {
-              document.getElementById('status').innerText = 'Saved';
-              lastFetchedContent = content;
-              isTyping = false;
+              console.log('[CloudPad] Persisted to database');
             }
           })
-          .catch(error => console.error('Failed to save note:', error));
-      }
-    };
+          .catch(error => console.error('[CloudPad] Persistence error:', error));
+      }, 30000); // 30 seconds
+    }
 
-    // Auto-save after user stops typing for 500ms
-    document.getElementById('note-content').addEventListener('input', () => {
-      isTyping = true;
-      clearTimeout(saveTimeout);
-
-      document.getElementById('status').innerText = 'Saving...';
-
-      saveTimeout = setTimeout(() => {
-        saveNote();
-        isTyping = false;
-      }, 800);
-    });
-
-    // Function to fetch the latest note content
-    const fetchNote = () => {
-      if (!isTyping) {
-        fetch("{% url 'load_note' note.url_id %}")
-          .then(response => response.json())
-          .then(data => {
-            const newContent = data.content.trim();
-            if (lastFetchedContent !== newContent) {
-              document.getElementById('note-content').value = newContent;
-              lastFetchedContent = newContent;
-            }
-          })
-          .catch(error => console.error('Failed to fetch note:', error));
-      }
-    };
-
-    // Auto-fetch notes and files every 3 seconds
-    fetchInterval = setInterval(() => {
-      if (!isTyping) {
-        saveNote(); // First save the current state
-        fetchNote(); // Then fetch latest state
-      }
-    }, 3000);
-
-    // Initial load
-    fetchNote();
+    // START: File Upload Logic (unchanged from original)
+    // This section handles Supabase file uploads
     fetchFilesFromBucket();
 
     const noteContent = document.getElementById('note-content');

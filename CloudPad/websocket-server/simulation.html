@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Yjs Sync Simulation</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .client {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-top: 10px;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .log {
+            font-family: monospace;
+            font-size: 12px;
+            height: 100px;
+            overflow-y: auto;
+            background: #eee;
+            border: 1px solid #999;
+            margin-top: 10px;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="client" id="client1">
+        <h2>Client 1</h2>
+        <div class="status">Connecting...</div>
+        <textarea></textarea>
+        <div class="log"></div>
+    </div>
+
+    <div class="client" id="client2">
+        <h2>Client 2</h2>
+        <div class="status">Connecting...</div>
+        <textarea></textarea>
+        <div class="log"></div>
+    </div>
+
+    <script src="test-bundle.js"></script>
+    <script>
+        const ROOM = 'simulation-room-' + Date.now(); // Unique room to avoid interference
+
+        class MockEditor {
+            constructor(id, color) {
+                this.id = id;
+                this.container = document.getElementById(id);
+                this.textarea = this.container.querySelector('textarea');
+                this.statusEl = this.container.querySelector('.status');
+                this.logEl = this.container.querySelector('.log');
+
+                this.ydoc = new Y.Doc();
+                this.provider = new WebsocketProvider('ws://localhost:1234', ROOM, this.ydoc, { connect: true });
+                this.yText = this.ydoc.getText('content');
+
+                this.isLocalChange = false;
+
+                this.log(`Initialized in room: ${ROOM}`);
+
+                this.bindEvents();
+            }
+
+            log(msg) {
+                const div = document.createElement('div');
+                div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                this.logEl.prepend(div);
+            }
+
+            bindEvents() {
+                this.provider.on('status', ({ status }) => {
+                    this.statusEl.innerText = status;
+                    this.log(`Status: ${status}`);
+                });
+
+                this.provider.on('sync', (isSynced) => {
+                    this.log(`Sync event: ${isSynced}`);
+                });
+
+                // Local Input
+                this.textarea.addEventListener('input', () => {
+                    if (!this.isLocalChange) {
+                        this.log('Typing (Local)...');
+                        this.ydoc.transact(() => {
+                            this.yText.delete(0, this.yText.length);
+                            this.yText.insert(0, this.textarea.value);
+                        }); // Origin defaults to null/this? No, defaults to transaction
+                    }
+                });
+
+                // Remote Updates
+                this.yText.observe((event) => {
+                    const origin = event.transaction.origin;
+                    this.log(`Observe event. Origin: ${origin === this.provider ? 'Remote (Provider)' : 'Local/Other'}`);
+
+                    // LOGIC TO TEST:
+                    if (origin === this.provider) {
+                        this.isLocalChange = true;
+                        this.log('Applying remote update to textarea');
+
+                        const oldLen = this.textarea.value.length;
+                        this.textarea.value = this.yText.toString();
+
+                        // Simple cursor preservation
+                        this.isLocalChange = false;
+                    } else {
+                        this.log('Ignoring local/other update');
+                    }
+                });
+            }
+        }
+
+        // Initialize two clients
+        const c1 = new MockEditor('client1');
+        const c2 = new MockEditor('client2');
+
+    </script>
+</body>
+
+</html>

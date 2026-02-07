@@ -1,0 +1,23 @@
+{
+  "name": "cloudpad-yjs-server",
+  "version": "1.0.0",
+  "description": "Yjs WebSocket server for CloudPad real-time collaboration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "lib0": "^0.2.89",
+    "ws": "^8.14.0",
+    "y-websocket": "^1.5.0",
+    "yjs": "^13.6.10"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.3",
+    "nodemon": "^3.0.2"
+  },
+  "author": "CloudPad Team",
+  "license": "MIT"
+}

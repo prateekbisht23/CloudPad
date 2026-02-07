@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yjs WebSocket Isolation Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        #status {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Yjs WebSocket Test</h1>
+    <div id="status">Initializing...</div>
+    <div id="log" class="log"></div>
+
+    <script src="test-bundle.js"></script>
+    <script>
+        const log = (msg) => {
+            const el = document.getElementById('log');
+            el.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${msg}</div>`;
+            console.log(msg);
+        };
+
+        const setStatus = (msg, type) => {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.className = type;
+        };
+
+        log('Starting test...');
+
+        if (typeof window.Y === 'undefined' || typeof window.WebsocketProvider === 'undefined') {
+            setStatus('Error: Yjs Bundle failed to load globals!', 'error');
+            log('FAILED: window.Y or window.WebsocketProvider is missing.');
+        } else {
+            log('Globals found. Connecting to ws://localhost:1234...');
+            try {
+                const doc = new Y.Doc();
+                const provider = new WebsocketProvider(
+                    'ws://localhost:1234',
+                    'isolation-test-room',
+                    doc
+                );
+
+                provider.on('status', event => {
+                    log(`Status changed: ${event.status}`);
+                    if (event.status === 'connected') {
+                        setStatus('CONNECTED ✅', 'success');
+                        log('SUCCESS: Connected to WebSocket server.');
+                    } else if (event.status === 'disconnected') {
+                        setStatus('Disconnected ❌', 'error');
+                    }
+                });
+
+                provider.on('sync', isSynced => {
+                    log(`Sync status: ${isSynced}`);
+                });
+
+            } catch (e) {
+                setStatus(`Exception: ${e.message}`, 'error');
+                log(`CRITICAL ERROR: ${e.stack}`);
+            }
+        }
+    </script>
+</body>
+
+</html>
