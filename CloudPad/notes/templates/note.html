@@ -88,9 +88,6 @@
   </div>
 </div>
 
-<!-- Supabase (for file uploads) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <!-- Yjs (Local Bundle - Verified) -->
 <script src="{% static 'js/yjs-bundle.js' %}?v=3"></script>
 
@@ -99,10 +96,17 @@
   // Import Yjs Editor
   import { YjsEditor } from '{% static "js/yjs-editor.js" %}?v=3';
 
-  // Supabase config for file uploads only
-  const SUPABASE_URL = '{{ SUPABASE_URL|safe }}';
-  const SUPABASE_KEY = '{{ SUPABASE_KEY|safe }}';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // CSRF helper (needed for POST requests)
+  function getCsrfToken() {
+    const name = 'csrftoken';
+    for (const cookie of document.cookie.split(';')) {
+      const [k, v] = cookie.trim().split('=');
+      if (k === name) return decodeURIComponent(v);
+    }
+    return '';
+  }
+
+  const NOTE_ID = '{{ note.url_id }}';
 
   document.addEventListener('DOMContentLoaded', () => {
     // Initialize Yjs for real-time collaboration
@@ -151,9 +155,8 @@
       }, 30000); // 30 seconds
     }
 
-    // START: File Upload Logic (unchanged from original)
-    // This section handles Supabase file uploads
-    fetchFilesFromBucket();
+    // START: File Upload Logic (backend-proxied via Django)
+    fetchFilesFromBackend();
 
     const noteContent = document.getElementById('note-content');
 
@@ -273,152 +276,102 @@
 
 
   confirmUpload.addEventListener('click', async () => {
-    const dynamicPath = document.getElementById('dynamic-path').innerText;
     const files = fileInput.files;
 
     if (!files.length) {
-      showToast("Please select files to upload.");
+      showToast('Please select files to upload.');
       return;
     }
 
-    try {
-      // Try uploading directly
-      for (const file of files) {
-        await uploadFileToBucket(dynamicPath, file);
-      }
-    } catch (error) {
-      if (error.statusCode === '404') {
-        console.log("Sub-bucket doesn't exist — creating it...");
-        await createSubBucket(dynamicPath);
+    let allOk = true;
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
 
-        // Retry uploading after creating the bucket
-        for (const file of files) {
-          await uploadFileToBucket(dynamicPath, file);
+      try {
+        const resp = await fetch(`/${NOTE_ID}/upload/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCsrfToken() },
+          body: formData,
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          showToast(`Failed to upload ${file.name}: ${data.error}`, 'error');
+          allOk = false;
         }
-      } else {
-        console.error("Error uploading files:", error.message);
-        showToast(`Failed to upload files: ${error.message}`);
-        return;
+      } catch (err) {
+        showToast(`Failed to upload ${file.name}`, 'error');
+        allOk = false;
       }
     }
 
-    showToast("Files uploaded successfully!");
+    if (allOk) showToast('Files uploaded successfully!');
     uploadDialog.classList.add('hidden');
-    uploadPreview.innerHTML = ''; // Clear preview after upload
-
-    fetchFilesFromBucket();
-
+    uploadPreview.innerHTML = '';
+    fetchFilesFromBackend();
   });
 
-  async function createSubBucket(dynamicPath) {
-    const { data, error } = await supabase
-      .storage
-      .from('cloudpad-files') // Parent bucket name
-      .upload(`${dynamicPath}/.placeholder`, new Blob([]), {
-        upsert: false // Don't overwrite if it already exists
-      });
-
-    if (error && error.statusCode !== '409') {
-      throw new Error(`Failed to create sub-bucket: ${error.message}`);
-    }
-  }
-
-  async function uploadFileToBucket(dynamicPath, file) {
-    const filePath = `${dynamicPath}/${file.name}`;
-
-    const { data, error } = await supabase
-      .storage
-      .from('cloudpad-files') // Parent bucket name
-      .upload(filePath, file, {
-        upsert: true // Overwrites existing files
-      });
-
-    if (error) {
-      throw new Error(`Failed to upload file: ${file.name} - ${error.message}`);
-    }
-  }
-
-  async function fetchFilesFromBucket() {
-    const dynamicPath = document.getElementById('dynamic-path').innerText;
+  async function fetchFilesFromBackend() {
     const fileList = document.getElementById('file-list');
-
-    // Clear existing files before fetching new ones
     fileList.innerHTML = '';
 
-    // 👇 Get list of files from the sub-bucket
-    const { data, error } = await supabase
-      .storage
-      .from('cloudpad-files')
-      .list(dynamicPath);
+    try {
+      const resp = await fetch(`/${NOTE_ID}/files/`);
+      const data = await resp.json();
+      const files = data.files || [];
 
-    if (error) {
-      console.error('Failed to load files:', error.message);
-      fileList.innerHTML = '<p class="text-gray-500">Failed to load files.</p>';
-      return;
-    }
+      if (!files.length) return;
 
-    if (!data.length) {
-      return;
-    }
-
-    // 🎯 Display the files in the UI
-    data.forEach((file) => {
-      const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/cloudpad-files/${dynamicPath}/${file.name}`;
-
-      const fileElement = document.createElement("div");
-      fileElement.className =
-        "bg-white rounded shadow p-3 flex items-center justify-between";
-      fileElement.innerHTML = `
+      files.forEach((file) => {
+        const fileElement = document.createElement('div');
+        fileElement.className = 'bg-white rounded shadow p-3 flex items-center justify-between';
+        fileElement.innerHTML = `
   <div class="flex items-center space-x-2">
   <button class="text-gray-600 hover:text-primary p-2 rounded-button cursor-pointer">
   <div class="w-5 h-5 flex items-center justify-center">
-  <a href="${fileUrl}" target="_blank" download="${file.name}">
+  <a href="${file.url}" target="_blank" download="${file.name}">
     <i class="ri-download-line"></i>
   </a>
   </div>
   </button>
   <div class="w-8 h-8 flex items-center justify-center text-primary">
-  <i class="ri-file-${file.type}-line ri-lg"></i>
+  <i class="ri-file-line ri-lg"></i>
   </div>
   <div class="ml-3">
-
-  <div class="text-sm font-medium text-gray-700"><a href="${fileUrl}" target="_blank">${file.name}</a></div>
-  <div class="text-xs text-gray-500">${file.size}</div>
+  <div class="text-sm font-medium text-gray-700"><a href="${file.url}" target="_blank">${file.name}</a></div>
+  <div class="text-xs text-gray-500">${file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}</div>
   </div>
   </div>
-  <button class="text-gray-600 hover:text-red-500 p-2 rounded-button cursor-pointer remove-file" onclick="deleteFileFromBucket('${file.name}')">
+  <button class="text-gray-600 hover:text-red-500 p-2 rounded-button cursor-pointer"
+    onclick="window._deleteFile('${file.name}')">
   <div class="w-5 h-5 flex items-center justify-center">
   <i class="ri-close-line"></i>
   </div>
   </button>`;
-
-      fileList.appendChild(fileElement);
-    });
-  }
-
-  async function deleteFileFromBucket(fileName) {
-    const dynamicPath = document.getElementById('dynamic-path').innerText;
-    const filePath = `${dynamicPath}/${fileName}`;
-
-    try {
-      const { error } = await supabase
-        .storage
-        .from('cloudpad-files')
-        .remove([filePath]);
-
-      if (error) {
-        throw new Error(`Failed to delete file: ${error.message}`);
-      }
-
-      showToast(`"${fileName}" deleted successfully`, "success");
-
-      // Refresh the file list after deletion
-      fetchFilesFromBucket();
-    } catch (error) {
-      console.error("Error deleting file:", error.message);
-      showToast(`Failed to delete file: ${error.message}`, "error");
+        fileList.appendChild(fileElement);
+      });
+    } catch (err) {
+      console.error('Failed to load files:', err);
     }
   }
+
+  // Expose delete to inline onclick
+  window._deleteFile = async function(fileName) {
+    try {
+      const resp = await fetch(`/${NOTE_ID}/files/${encodeURIComponent(fileName)}/delete/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrfToken() },
+      });
+      if (resp.ok) {
+        showToast(`"${fileName}" deleted successfully`, 'success');
+        fetchFilesFromBackend();
+      } else {
+        showToast(`Failed to delete ${fileName}`, 'error');
+      }
+    } catch (err) {
+      showToast(`Failed to delete ${fileName}`, 'error');
+    }
+  };
 
 
   function showToast(message, type = "success") {
