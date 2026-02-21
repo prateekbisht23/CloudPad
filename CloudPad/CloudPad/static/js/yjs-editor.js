@@ -71,18 +71,27 @@ export class YjsEditor {
     }
 
     bindEvents() {
+        // Track whether we've ever had a connection error (cleared on reconnect)
+        this._hadConnectionError = false
+
         // Connection status
         this.provider.on('status', ({ status }) => {
             console.log('[Yjs] Connection status:', status)
 
             if (this.config.statusElement) {
                 if (status === 'connected') {
+                    // Clear any previous connection error
+                    this._hadConnectionError = false
                     this.config.statusElement.innerText = 'Connected'
                     this.config.statusElement.className = 'text-green-600'
                 } else if (status === 'disconnected') {
-                    this.config.statusElement.innerText = 'Disconnected'
-                    this.config.statusElement.className = 'text-red-600'
+                    // Only show Disconnected if we haven't already shown a connection error
+                    if (!this._hadConnectionError) {
+                        this.config.statusElement.innerText = 'Disconnected'
+                        this.config.statusElement.className = 'text-orange-500'
+                    }
                 } else if (status === 'connecting') {
+                    this._hadConnectionError = false
                     this.config.statusElement.innerText = 'Connecting...'
                     this.config.statusElement.className = 'text-yellow-600'
                 }
@@ -105,12 +114,15 @@ export class YjsEditor {
                     this.isInitialized = true
                     this.config.onReady()
                 }
+
+                // Synced — clear any lingering error state
+                this._hadConnectionError = false
             }
 
             if (this.config.statusElement && isSynced) {
                 this.config.statusElement.innerText = 'Saved'
                 this.config.statusElement.className = 'text-green-600'
-            } else if (this.config.statusElement) {
+            } else if (this.config.statusElement && !this._hadConnectionError) {
                 this.config.statusElement.innerText = 'Syncing...'
                 this.config.statusElement.className = 'text-blue-600'
             }
@@ -118,15 +130,31 @@ export class YjsEditor {
             this.config.onSync(isSynced)
         })
 
-        // Connection errors
+        // Connection errors — mark the flag but don't permanently lock the UI
         this.provider.on('connection-error', (error) => {
             console.error('[Yjs] Connection error:', error)
+            this._hadConnectionError = true
             this.config.onError(error)
 
             if (this.config.statusElement) {
-                this.config.statusElement.innerText = 'Connection Error'
-                this.config.statusElement.className = 'text-red-600'
+                this.config.statusElement.innerText = 'Reconnecting...'
+                this.config.statusElement.className = 'text-yellow-600'
             }
+
+            // Auto-clear the error message after 4 seconds if the provider reconnects
+            clearTimeout(this._errorClearTimeout)
+            this._errorClearTimeout = setTimeout(() => {
+                if (this.provider.wsconnected) {
+                    this._hadConnectionError = false
+                    if (this.config.statusElement) {
+                        this.config.statusElement.innerText = 'Saved'
+                        this.config.statusElement.className = 'text-green-600'
+                    }
+                } else if (this.config.statusElement) {
+                    this.config.statusElement.innerText = 'Offline'
+                    this.config.statusElement.className = 'text-gray-500'
+                }
+            }, 4000)
         })
     }
 
@@ -158,12 +186,16 @@ export class YjsEditor {
                     // Reset to Saved after delay (optimistic UI)
                     clearTimeout(this.saveTimeout)
                     this.saveTimeout = setTimeout(() => {
+                        // Always persist to Django backend regardless of WS state
+                        this.saveToBackend(this.ydoc.getText('content').toString())
+
                         if (this.provider.wsconnected) {
                             this.config.statusElement.innerText = 'Saved'
                             this.config.statusElement.className = 'text-green-600'
-
-                            // Trigger persistence to Django
-                            this.saveToBackend(this.ydoc.getText('content').toString())
+                        } else {
+                            // Saved to DB even if real-time WS is down
+                            this.config.statusElement.innerText = 'Saved'
+                            this.config.statusElement.className = 'text-green-600'
                         }
                     }, 1000)
                 }
