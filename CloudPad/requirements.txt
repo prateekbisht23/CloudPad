@@ -1,6 +1,6 @@
 asgiref==3.8.1
-bleach==6.1.0
-dj-database-url==2.3.0
+bleach==6.2.0
+dj-database-url==3.0.0
 Django==4.2.18
 django-cors-headers==4.3.1
 django-ratelimit==4.1.0
@@ -11,3 +11,4 @@ python-dotenv==1.0.1
 redis==5.0.1
 sqlparse==0.5.3
 typing_extensions==4.12.2
+whitenoise==6.8.2
