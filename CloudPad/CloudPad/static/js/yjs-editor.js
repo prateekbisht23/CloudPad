@@ -11,6 +11,8 @@ export class YjsEditor {
         this.config = {
             wsUrl: config.wsUrl || 'ws://localhost:1234',
             documentName: config.documentName,
+            // urlId is the raw note ID used for backend API calls (without 'note-' prefix)
+            urlId: config.urlId || config.documentName.replace(/^note-/, ''),
             textarea: config.textarea,
             statusElement: config.statusElement,
             onReady: config.onReady || (() => { }),
@@ -279,7 +281,7 @@ export class YjsEditor {
         }
 
         const csrftoken = getCookie('csrftoken');
-        const urlId = this.config.documentName;
+        const urlId = this.config.urlId;
 
         fetch(`/${urlId}/save/`, {
             method: 'POST',
