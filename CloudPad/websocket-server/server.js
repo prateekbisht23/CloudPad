@@ -10,8 +10,8 @@ const http = require('http')
 const { setupWSConnection } = require('y-websocket/bin/utils')
 require('dotenv').config()
 
-const PORT = process.env.WS_PORT || 1234
-const HOST = process.env.WS_HOST || 'localhost'
+const PORT = process.env.PORT || process.env.WS_PORT || 10000
+const HOST = process.env.HOST || process.env.WS_HOST || '0.0.0.0'
 
 // Create HTTP server for health checks
 const server = http.createServer((request, response) => {
