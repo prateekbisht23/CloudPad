@@ -4,7 +4,7 @@
 
 🚨 **Note:** CloudPad is now live! Real-time text sharing and file uploads are fully functional.
 
-👉 **[Visit CloudPad](https://cloudpad-mya5.onrender.com/)**  
+👉 **[Visit CloudPad](https://cloudpad.bishh.dev/)**  
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 📌 How It Works
 
-1. **Visit the Link** – Open **[https://cloudpad-mya5.onrender.com/](https://cloudpad-mya5.onrender.com/)**.  
+1. **Visit the Link** – Open **[https://cloudpad.bishh.dev/](https://cloudpad.bishh.dev/)**.  
 2. **Enter a URL** – Type any custom URL (e.g., `/your-note`).  
 3. **Start Typing** – Your text is saved in real time.  
 4. **Upload Files** – Upload PDFs, images, and more directly to the note.  

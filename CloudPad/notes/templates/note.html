@@ -8,7 +8,7 @@
   <div id="editor-page" class="max-w-4xl mx-auto space-y-6">
     <div class="bg-white rounded shadow p-4 flex items-center">
       <div class="flex-1 bg-blue-50 rounded px-3 py-2 editor-font text-sm">
-        <span class="text-gray-600">cloudpad.io/</span>
+        <span class="text-gray-600">{{ request.get_host }}/</span>
         <span id="dynamic-path" class="text-primary">{{ note.url_id }}</span>
       </div>
       <button id="copy-url" class="ml-3 p-2 text-gray-600 hover:text-primary rounded-button cursor-pointer">
