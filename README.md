@@ -24,6 +24,24 @@
 - **Database:** Supabase (for real-time storage and file handling)  
 - **Frontend:** Django Templates  
 - **Storage:** Supabase Buckets  
+- **Real-time:** Yjs + Node.js WebSocket server  
+
+---
+
+## 📁 Project Structure
+
+```
+cloudpad/
+├── CloudPad/            # Django project config (settings, urls, wsgi, templates, static)
+├── notes/               # Django app: pads, file proxy, health check
+├── websocket-server/    # Node.js Yjs WebSocket server (deployed separately)
+├── docs/                # Testing guides
+├── .github/workflows/   # Keep-alive ping for Render + Supabase
+├── manage.py
+├── requirements.txt
+├── build.sh             # Render build script
+└── .env.example
+```
 
 ---
 
