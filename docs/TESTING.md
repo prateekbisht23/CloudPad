@@ -5,7 +5,7 @@
 ### 1. Run the Development Server
 
 ```bash
-cd /Users/prateekbisht/Desktop/CloudPad/CloudPad
+cd cloudpad  # repo root
 python3 manage.py runserver
 ```
 
@@ -226,7 +226,7 @@ print(f"Queries executed: {len(connection.queries)}")
 Check that views use `NoteService`:
 
 ```bash
-grep -n "NoteService" /Users/prateekbisht/Desktop/CloudPad/CloudPad/notes/views.py
+grep -n "NoteService" notes/views.py
 ```
 
 Should see imports and method calls.
@@ -243,7 +243,7 @@ grep "Note loaded successfully" logs/cloudpad.log
 
 ```bash
 # Check validators are imported:
-grep -n "validators" /Users/prateekbisht/Desktop/CloudPad/CloudPad/notes/services.py
+grep -n "validators" notes/services.py
 ```
 
 ### ✅ Database Indexes

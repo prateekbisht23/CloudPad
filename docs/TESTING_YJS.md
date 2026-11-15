@@ -5,7 +5,7 @@
 ### 1. Start the WebSocket Server
 
 ```bash
-cd websocket-server
+cd websocket-server  # from repo root
 node server.js
 ```
 

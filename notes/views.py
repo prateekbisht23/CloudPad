@@ -46,6 +46,23 @@ def about(request):
     return render(request, 'about.html')
 
 
+@require_http_methods(["GET", "HEAD"])
+def health(request):
+    """
+    Keep-alive / health check. Runs a real DB query so that pinging this
+    endpoint keeps both the Render web service and the Supabase database active.
+    """
+    from django.db import connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        return JsonResponse({"status": "ok", "db": "ok"})
+    except Exception as e:
+        logger.error(f"Health check DB error: {e}", exc_info=True)
+        return JsonResponse({"status": "error", "db": "unreachable"}, status=503)
+
+
 @ensure_csrf_cookie
 @require_http_methods(["GET"])
 def note_view(request, url_id):

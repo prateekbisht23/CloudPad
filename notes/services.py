@@ -36,14 +36,22 @@ class NoteService:
             # Validate URL ID
             validated_url_id = validate_url_id(url_id)
             
-            # Get or create the note
-            note, created = Note.active_objects.get_or_create(
+            # Look up across ALL rows (incl. soft-deleted): url_id is unique at
+            # the DB level, so creating via active_objects would hit an
+            # IntegrityError when a soft-deleted row with this url_id exists.
+            note, created = Note.objects.get_or_create(
                 url_id=validated_url_id,
                 defaults={'content': ''}
             )
-            
-            # Touch access time to prevent expiration
+
             if not created:
+                if note.is_deleted:
+                    # Revive an expired pad as a fresh, empty one
+                    note.is_deleted = False
+                    note.content = ''
+                    note.save(update_fields=['is_deleted', 'content', 'updated_at'])
+                    created = True
+                # Touch access time to prevent expiration
                 note.touch_access()
             
             logger.info(
